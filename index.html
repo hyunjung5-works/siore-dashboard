@@ -12,45 +12,43 @@
   .frame-h{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px; flex-wrap:wrap; }
   .frame-h h2{ font-size:15px; font-weight:700; }
 
-  /* ---- 매출 대시보드 타이틀 ---- */
-  .sales-ttl{
-    display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap;
+  /* 섹션 타이틀 */
+  .sttl{ display:flex; align-items:center; gap:11px; margin-bottom:14px; flex-wrap:wrap; }
+  .sttl .no{
+    width:30px; height:24px; border-radius:6px; display:grid; place-items:center;
+    font-size:10.5px; font-weight:800; letter-spacing:.5px;
+    border:1.5px solid var(--mint); color:var(--mint-2); background:rgba(15,184,154,.07);
   }
-  .sales-ttl h2{ font-size:19px; font-weight:750; letter-spacing:-.5px; }
-  .sales-ttl .bar{ width:4px; height:22px; border-radius:2px;
-    background:linear-gradient(180deg,var(--mint),var(--cyan)); }
+  .sttl h2{ font-size:17px; font-weight:750; letter-spacing:-.4px; }
+  .sttl .rt{ margin-left:auto; font-size:11.5px; color:var(--tx-3); }
 
-  /* ---- 일간 통합 실적 스트립 (가로로 길게) ---- */
+  /* 통합 실적 (라이트, 살짝 강조) */
   .strip{
-    background:linear-gradient(135deg,#000 0%,#0E1214 60%,#151B1E 100%);
-    border:1px solid #262C30; border-radius:16px; padding:20px 24px; margin-bottom:16px;
-    position:relative; overflow:hidden; color:#F2F5F6;
-    box-shadow:0 6px 24px rgba(18,24,27,.13);
+    background:linear-gradient(135deg, #EFFBF8 0%, #F4FBFC 55%, #F7F9FA 100%);
+    border:1px solid rgba(15,184,154,.28); border-radius:14px; padding:18px 20px; margin-bottom:14px;
+    box-shadow:0 2px 10px rgba(15,184,154,.08);
   }
-  .strip::after{ content:''; position:absolute; right:-40px; top:-70px; width:260px; height:260px; border-radius:50%;
-    background:radial-gradient(circle, rgba(46,230,197,.15), transparent 70%); }
-  .strip-h{ display:flex; align-items:baseline; gap:10px; margin-bottom:16px; flex-wrap:wrap; position:relative; }
-  .strip-h h3{ font-size:14px; font-weight:700; color:#fff; letter-spacing:-.2px; }
-  .strip-h .sub{ font-size:11.5px; color:#8A959C; }
-  .strip-k{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; position:relative; }
+  .strip-h{ display:flex; align-items:baseline; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+  .strip-h h3{ font-size:13.5px; font-weight:750; color:var(--tx); }
+  .strip-h .sub{ font-size:11.5px; color:var(--tx-3); }
+  .strip-k{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
   @media(max-width:820px){ .strip-k{ grid-template-columns:1fr; } }
   .strip-k > div{
-    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09);
-    border-radius:12px; padding:15px 17px; position:relative; overflow:hidden;
+    background:#fff; border:1px solid var(--line); border-radius:11px; padding:14px 16px;
+    position:relative; overflow:hidden;
   }
   .strip-k > div::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
-    background:linear-gradient(180deg,#2EE6C5,#35D6F0); }
-  .strip-k .l{ font-size:10.5px; color:#8A959C; text-transform:uppercase; letter-spacing:.7px;
-    font-weight:650; margin-bottom:8px; }
-  .strip-k .v{ font-size:26px; font-weight:780; letter-spacing:-1px; color:#fff; font-variant-numeric:tabular-nums; }
-  .strip-k .s{ font-size:11px; color:#8A959C; margin-top:6px; font-variant-numeric:tabular-nums; }
-  .strip-k .s .up{ color:#2EE6C5; } .strip-k .s .dn{ color:#FF7B7B; }
+    background:linear-gradient(180deg,var(--mint),var(--cyan)); }
+  .strip-k .l{ font-size:10.5px; color:var(--tx-3); text-transform:uppercase; letter-spacing:.6px;
+    font-weight:650; margin-bottom:7px; }
+  .strip-k .v{ font-size:24px; font-weight:780; letter-spacing:-.9px; color:var(--tx); font-variant-numeric:tabular-nums; }
+  .strip-k .s{ font-size:11px; color:var(--tx-3); margin-top:6px; font-variant-numeric:tabular-nums; }
 
-  /* ---- 4개 채널 파트 ---- */
-  .parts{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(310px,1fr)); }
+  /* 4개 채널 파트 */
+  .parts{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
   .part{
     background:var(--surface); border:1px solid var(--line); border-radius:14px;
-    padding:17px 18px; display:flex; flex-direction:column; gap:13px;
+    padding:17px 18px; display:flex; flex-direction:column; gap:12px;
     box-shadow:var(--shadow); transition:.18s; position:relative; overflow:hidden;
   }
   .part:hover{ border-color:var(--mint); transform:translateY(-2px); box-shadow:var(--shadow-lg); }
@@ -59,23 +57,20 @@
   .part.p-b2b::before{ background:linear-gradient(90deg,var(--c-b2b),#5B44B8); }
   .part.p-own::before{ background:linear-gradient(90deg,var(--c-own),var(--mint-2)); }
   .part.p-grp::before{ background:linear-gradient(90deg,var(--c-group),#A87C10); }
-
   .part-h{ display:flex; align-items:center; gap:9px; }
   .part-h .ico{ width:32px; height:32px; border-radius:9px; display:grid; place-items:center;
     font-size:15px; background:var(--bg-2); border:1px solid var(--line); flex-shrink:0; }
   .part-h .t{ flex:1; min-width:0; }
   .part-h h4{ font-size:13.5px; font-weight:750; letter-spacing:-.2px; }
   .part-h .d{ font-size:10.5px; color:var(--tx-3); margin-top:1px; }
-
   .part-k{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
   .part-k > div{ background:var(--bg-2); border:1px solid var(--line-soft); border-radius:9px; padding:9px 10px; text-align:center; }
   .part-k .l{ font-size:9.5px; color:var(--tx-3); font-weight:650; letter-spacing:.3px; margin-bottom:5px; }
   .part-k .v{ font-size:14px; font-weight:750; letter-spacing:-.4px; font-variant-numeric:tabular-nums; color:var(--tx); line-height:1.25; }
   .part-k .v small{ display:block; font-size:10px; color:var(--tx-3); font-weight:600; margin-top:2px; letter-spacing:0; }
-
   .part-top{ border-top:1px solid var(--line-soft); padding-top:11px; }
   .part-top .th{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-  .part-top .th span{ font-size:10.5px; font-weight:700; color:var(--tx-3); text-transform:uppercase; letter-spacing:.5px; }
+  .part-top .th span:first-child{ font-size:10.5px; font-weight:700; color:var(--tx-3); text-transform:uppercase; letter-spacing:.5px; }
   .top3{ display:flex; flex-direction:column; gap:7px; }
   .top3-i{ display:flex; align-items:center; gap:8px; font-size:11.5px; }
   .top3-n{ width:17px; height:17px; border-radius:5px; display:grid; place-items:center; flex-shrink:0;
@@ -83,12 +78,23 @@
   .top3-i:nth-child(1) .top3-n{ background:linear-gradient(135deg,var(--mint),var(--cyan)); color:#fff; }
   .top3-nm{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--tx); font-weight:600; }
   .top3-v{ flex-shrink:0; color:var(--tx-2); font-variant-numeric:tabular-nums; font-weight:650; }
-  .top3-q{ flex-shrink:0; color:var(--tx-3); font-size:10.5px; font-variant-numeric:tabular-nums; min-width:34px; text-align:right; }
-
+  .top3-q{ flex-shrink:0; color:var(--tx-3); font-size:10.5px; font-variant-numeric:tabular-nums; }
   .part-go{ margin-top:auto; padding-top:11px; border-top:1px solid var(--line-soft);
     display:flex; justify-content:space-between; align-items:center; }
   .part-go a{ color:var(--mint-2); font-size:12px; font-weight:700; text-decoration:none; }
   .part-go a:hover{ text-decoration:underline; }
+
+  /* 마케팅 3분할 */
+  .mk3{ display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); }
+  .mkbox{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:17px 18px; box-shadow:var(--shadow); }
+  .mkbox h4{ font-size:12.5px; font-weight:750; margin-bottom:13px; display:flex; align-items:center; gap:8px; }
+  .mkbox h4::before{ content:''; width:14px; height:2px; background:var(--mint); border-radius:2px; }
+  .mkrow{ display:flex; align-items:baseline; gap:8px; padding:8px 0; border-bottom:1px dashed var(--line); font-size:12px; }
+  .mkrow:last-child{ border-bottom:none; }
+  .mkrow .k{ color:var(--tx-3); font-weight:600; white-space:nowrap; }
+  .mkrow .dots{ flex:1; border-bottom:1px dotted var(--line); transform:translateY(-3px); }
+  .mkrow .v{ color:var(--tx); font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .mkrow .v small{ color:var(--tx-3); font-weight:600; margin-left:4px; }
 </style>
 </head>
 <body>
@@ -98,13 +104,13 @@
     <div class="logo">
       <div class="logo-mark">SI</div>
       <div class="logo-tx">
-        <h1>SIORÉ 화장품사업본부 통합 대시보드</h1>
-        <div class="sub">매출 (유통처별) · 마케팅 · 재고 — 하나의 화면에서</div>
+        <h1>시오레 화장품사업본부 통합 대시보드</h1>
+        <div class="sub">매출 (유통처별) · 마케팅 성과 · 재고 · 발주</div>
       </div>
     </div>
     <div class="hdr-right">
+      <span class="pill" id="refresh">데이터 갱신: —</span>
       <span class="pill" id="fx"><span class="dot"></span>환율 로딩…</span>
-      <span class="pill" id="status"><span class="dot"></span>로딩…</span>
       <button class="btn" onclick="location.reload()">↻ 새로고침</button>
     </div>
   </div>
@@ -113,9 +119,9 @@
 <nav class="nav">
   <div class="nav-in">
     <button class="on" data-t="home">🏠 메인</button>
-    <button data-t="sales">💰 매출</button>
-    <button data-t="mkt">📣 마케팅</button>
-    <button data-t="inv">📦 재고</button>
+    <button data-t="sales">💰 매출 상세</button>
+    <button data-t="mkt">📣 마케팅 상세</button>
+    <button data-t="inv">📦 재고 상세</button>
   </div>
 </nav>
 
@@ -124,149 +130,156 @@
 <!-- ===== HOME ===== -->
 <div class="tab on" id="t-home">
 
-  <!-- ===== 시오레 매출대시보드 ===== -->
+  <!-- 01 시오레 매출대시보드 -->
   <div class="sec">
-    <div class="sales-ttl">
-      <span class="bar"></span>
+    <div class="sttl">
+      <span class="no">01</span>
       <h2>시오레 매출대시보드</h2>
-      <span class="bdg bdg-info" id="ttl-day">—</span>
-      <a href="sales.html" class="btn" style="margin-left:auto">전체 매출 대시보드 →</a>
+      <span class="rt" id="ttl-day">—</span>
     </div>
 
-    <!-- 일간 통합 실적 -->
     <div class="strip">
       <div class="strip-h">
-        <h3>📊 일간 통합 실적</h3>
+        <h3>📊 통합 실적</h3>
         <span class="sub" id="strip-sub">—</span>
       </div>
       <div class="strip-k">
-        <div><div class="l">당일 매출 (유통처 통합)</div><div class="v" id="t-day-rev">—</div><div class="s" id="t-day-s">—</div></div>
+        <div><div class="l">주간 매출 (최근 7일)</div><div class="v" id="t-wk">—</div><div class="s" id="t-wk-s">—</div></div>
         <div><div class="l">월 누적 매출</div><div class="v" id="t-mtd">—</div><div class="s" id="t-mtd-s">—</div></div>
         <div><div class="l">연간 누적 매출</div><div class="v" id="t-ytd">—</div><div class="s" id="t-ytd-s">—</div></div>
       </div>
     </div>
 
-    <!-- 4개 유통처 파트 -->
     <div class="parts" id="parts"></div>
   </div>
 
-  <!-- 시그널 -->
+  <!-- 02 마케팅 성과 -->
   <div class="sec">
-    <div class="sec-h"><h2>오늘의 시그널</h2><span class="note">데이터가 말하는 3가지</span></div>
-    <div id="signals" class="grid g3"></div>
-  </div>
+    <div class="sttl">
+      <span class="no">02</span>
+      <h2>마케팅 성과</h2>
+      <span class="rt">단위: 원 / USD / % · 광고비 포함</span>
+    </div>
 
-  <!-- 마케팅 · 재고 -->
-  <div class="sec">
-    <div class="sec-h"><h2>마케팅 · 재고</h2></div>
-    <div class="hub">
-      <div class="hub-c">
-        <div class="hub-top">
-          <div class="hub-ico">📣</div>
-          <div class="hub-ttl"><h3>마케팅 대시보드</h3><p>메타(Meta) 광고 성과</p></div>
-        </div>
-        <div class="hub-desc">광고비·ROAS·CPC·CTR 일별 추적. 지출 구간별 효율 분석과 손익분기 ROAS 시뮬레이터로 예산 증액 의사결정을 지원합니다.</div>
-        <div class="hub-mini">
-          <div><div class="l">총 광고비</div><div class="v" id="m-spend">—</div></div>
-          <div><div class="l">ROAS</div><div class="v" id="m-roas">—</div></div>
-          <div><div class="l">CPA</div><div class="v" id="m-cpa">—</div></div>
-          <div><div class="l">구매</div><div class="v" id="m-buy">—</div></div>
-        </div>
-        <div class="hub-go">
-          <a href="#" data-go="mkt">대시보드 열기 →</a>
-          <a href="marketing.html" target="_blank" style="color:var(--tx-3);font-weight:500">새 창 ↗</a>
-        </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-h"><h3>채널별 성과</h3><span class="hint" id="ch-hint">—</span></div>
+      <div class="tbl-wrap"><table id="tb-ch"></table></div>
+    </div>
+
+    <div class="mk3">
+      <div class="mkbox">
+        <h4>유료 광고 집행</h4>
+        <div id="mk-paid"></div>
       </div>
-
-      <div class="hub-c">
-        <div class="hub-top">
-          <div class="hub-ico">📦</div>
-          <div class="hub-ttl"><h3>재고 대시보드</h3><p>아워박스 · 아마존 FBA</p></div>
-        </div>
-        <div class="hub-desc">SKU별 재고·일평균 소진·소진 예상일을 실시간 추적. 리드타임 + 안전버퍼 기준 발주 알람과 유통처별 출고 흐름을 한눈에.</div>
-        <div class="hub-mini">
-          <div><div class="l">국내</div><div class="v" id="i-dom">—</div></div>
-          <div><div class="l">FBA</div><div class="v" id="i-us">—</div></div>
-          <div><div class="l">🚨 즉시</div><div class="v" id="i-urg">—</div></div>
-          <div><div class="l">⚠️ 검토</div><div class="v" id="i-wat">—</div></div>
-        </div>
-        <div class="hub-go">
-          <a href="#" data-go="inv">대시보드 열기 →</a>
-          <a href="inventory.html" target="_blank" style="color:var(--tx-3);font-weight:500">새 창 ↗</a>
-        </div>
+      <div class="mkbox">
+        <h4>트래픽 · 전환</h4>
+        <div id="mk-traffic"></div>
       </div>
-
-      <div class="hub-c">
-        <div class="hub-top">
-          <div class="hub-ico">🔌</div>
-          <div class="hub-ttl"><h3>데이터 소스 상태</h3><p>구글시트 5종 + 환율 API</p></div>
-        </div>
-        <div class="tbl-wrap"><table id="tb-src" class="src-tbl"></table></div>
+      <div class="mkbox">
+        <h4>상품별 광고 효율 (ROAS)</h4>
+        <div id="mk-prod"></div>
       </div>
     </div>
   </div>
 
-  <div class="sec card">
-    <div class="card-h"><h3>월별 통합 매출 · 채널 믹스</h3><span class="hint" id="mix-hint">원화 환산</span></div>
-    <div class="chart"><canvas id="c-home"></canvas></div>
+  <!-- 03 재고 대시보드 -->
+  <div class="sec">
+    <div class="sttl">
+      <span class="no">03</span>
+      <h2>재고 대시보드</h2>
+      <span class="rt" id="inv-rt">—</span>
+    </div>
+
+    <div id="po-alert"></div>
+
+    <div class="grid g2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="card-h"><h3>발주 현황</h3><span class="hint">발주중 (미입고)</span></div>
+        <div class="tbl-wrap"><table id="tb-po"></table></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>발주 필요 알람</h3><span class="hint">소진예상일 ≤ 리드타임 + 안전버퍼</span></div>
+        <div id="po-need"></div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <div class="card-h"><h3>🇰🇷 국내 제품별 재고현황</h3><span class="hint">주요 9종 (RRP 제외)</span></div>
+        <div class="tbl-wrap"><table id="tb-dom"></table></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>🇺🇸 아마존 제품별 재고현황</h3><span class="hint">FBA 7종</span></div>
+        <div class="tbl-wrap"><table id="tb-us"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 오늘의 시그널 -->
+  <div class="sec">
+    <div class="sttl">
+      <span class="no">04</span>
+      <h2>오늘의 시그널</h2>
+      <span class="rt">데이터가 말하는 3가지</span>
+    </div>
+    <div id="signals" class="grid g3"></div>
+  </div>
+
+  <!-- 05 데이터 소스 상태 (관리자용) -->
+  <div class="sec">
+    <div class="sttl">
+      <span class="no">05</span>
+      <h2 style="font-size:14px;color:var(--tx-3)">데이터 소스 상태 <span style="font-size:11px">(관리자용)</span></h2>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap"><table id="tb-src" class="src-tbl"></table></div>
+    </div>
   </div>
 
 </div>
 
 <!-- ===== 임베드 탭 ===== -->
 <div class="tab" id="t-sales">
-  <div class="frame-h"><h2>💰 매출 대시보드</h2>
-    <a class="btn" href="sales.html" target="_blank">원본 새 창 ↗</a></div>
+  <div class="frame-h"><h2>💰 매출 대시보드</h2><a class="btn" href="sales.html" target="_blank">원본 새 창 ↗</a></div>
   <iframe class="frame" src="sales.html" title="매출 대시보드"></iframe>
 </div>
 <div class="tab" id="t-mkt">
-  <div class="frame-h"><h2>📣 마케팅 대시보드</h2>
-    <a class="btn" href="marketing.html" target="_blank">원본 새 창 ↗</a></div>
+  <div class="frame-h"><h2>📣 마케팅 대시보드</h2><a class="btn" href="marketing.html" target="_blank">원본 새 창 ↗</a></div>
   <iframe class="frame" src="marketing.html" title="마케팅 대시보드"></iframe>
 </div>
 <div class="tab" id="t-inv">
-  <div class="frame-h"><h2>📦 재고 대시보드</h2>
-    <a class="btn" href="inventory.html" target="_blank">원본 새 창 ↗</a></div>
+  <div class="frame-h"><h2>📦 재고 대시보드</h2><a class="btn" href="inventory.html" target="_blank">원본 새 창 ↗</a></div>
   <iframe class="frame" src="inventory.html" title="재고 대시보드"></iframe>
 </div>
 
 </div>
 
 <div class="foot">
-  <b style="color:var(--tx-2)">SIORÉ · 화장품사업본부 통합 대시보드</b><br>
-  아마존 매출은 USD 원본 + 당일 환율 원화 환산을 함께 표기합니다. 환율은 exchangerate-api에서 매 접속 시 자동 조회됩니다.<br>
-  아마존 데이터는 리포팅 지연으로 통상 <b>한국 기준 -2일</b>입니다. 자사몰·B2B는 시트에 일자별 원천이 없어 일간 실적이 월 데이터로 표시됩니다.
+  <b style="color:var(--tx-2)">시오레(SIORÉ) · 화장품사업본부 통합 대시보드</b><br>
+  아마존 매출은 USD 원본 + 당일 환율 원화 환산 병기. 환율은 접속 시 자동 조회됩니다.<br>
+  아마존 매출 데이터는 리포팅 지연으로 통상 <b>한국 기준 -2일</b>입니다.
 </div>
 
 <script src="assets/data.js"></script>
 <script>
-const MONTHS = ["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"];
 const g = id => document.getElementById(id);
+const S = SNAP;
 
-/* ---- 집계 ---- */
-const amzDaily = SNAP.amazonDaily;
-const LAST_DAY = amzDaily[amzDaily.length-1][0];      // 아마존 최신 데이터일
-const CUR_M    = LAST_DAY.slice(0,7);
+/* ---------- 기준일 ---------- */
+const AMZ_LAST = S.amazonDaily[S.amazonDaily.length-1][0];
+const OWN_LAST = S.ownLastDay;
+const BASE     = [AMZ_LAST, OWN_LAST].sort().pop();   // 가장 최신
+const CUR_M    = BASE.slice(0,7);
 
-const amzM = (()=>{ const m={}; amzDaily.forEach(([d,pv,q,u])=>{ const k=d.slice(0,7);
-  m[k]=m[k]||{pv:0,qty:0,usd:0}; m[k].pv+=pv; m[k].qty+=q; m[k].usd+=u; }); return m; })();
-const ownM = (()=>{ const m={}; SNAP.ownMonthly.forEach(r=> m[r[0]]=r); return m; })();
-const b2bM = (()=>{ const m={}; SNAP.b2bMonths.forEach((mo,i)=> m[mo]=U.sum(SNAP.b2bAccounts,a=>a[1][i])); return m; })();
+/* ---------- 아마존 헬퍼 ---------- */
+const amzRange = (from,to) => S.amazonDaily
+  .filter(r => (!from||r[0]>=from) && (!to||r[0]<=to))
+  .reduce((a,r)=>({ usd:a.usd+r[3], qty:a.qty+r[2], pv:a.pv+r[1] }), {usd:0,qty:0,pv:0});
 
-const amzToday = amzDaily[amzDaily.length-1];         // [date, pv, qty, usd]
-const amzPrev  = amzDaily[amzDaily.length-2];
-const OWN_LAST = SNAP.ownLastDay;                     // 자사몰 최신 데이터일
-
-/* ---- 마케팅 / 재고 (요약용) ---- */
-const ads = SNAP.adsDaily.filter(r=>r[1]>0);
-const adT = { spend:U.sum(ads,r=>r[1]), rev:U.sum(ads,r=>r[7]), buy:U.sum(ads,r=>r[6]) };
-adT.roas = adT.rev/adT.spend*100; adT.cpa = adT.spend/adT.buy;
-const ads30 = ads.slice(-30);
-const roas30 = U.sum(ads30,r=>r[7])/U.sum(ads30,r=>r[1])*100;
-
+/* ---------- 재고 모델 ---------- */
 const DOM_DAYS=101, LT=45, LT_US=60;
-const SAFETY_BUFFER_DAYS = { domestic: 14, amazon: 21 };
-const TH_DOM = LT + SAFETY_BUFFER_DAYS.domestic, TH_US = LT_US + SAFETY_BUFFER_DAYS.amazon;
+const BUF = { domestic:14, amazon:21 };
+const TH_DOM = LT+BUF.domestic, TH_US = LT_US+BUF.amazon;
 const SHIP_MAP = {
   "NMN 하이드로 캡슐 클렌징 밀크":"NMN 하이드로 캡슐 클렌징 밀크","NMN 프레쉬 버블 토너":"NMN 프레쉬 버블 토너",
   "NMN 인텐시브 세럼":"NMN 인텐시브 세럼","NMN 하이드레이팅 수딩 크림":"NMN 하이드레이팅 수딩 크림",
@@ -277,257 +290,368 @@ const SHIP_MAP = {
   "데일리 릴리프 에센스 토너":"데일리 릴리프 에센스 토너","데일리 릴리프 리페어 앰플":"데일리 릴리프 리페어 앰플",
   "데일리 릴리프 카밍 수딩 젤":"데일리 릴리프 카밍 수딩 젤","데일리 릴리프 컴포트 크림":"데일리 릴리프 컴포트 크림",
 };
-const shipTotal={}; SNAP.shipProductMonth.rows.forEach(([n,v])=> shipTotal[n]=U.sum(v));
-const stock = SNAP.stock.map(([c,n,rg,cat,ob,fba,res,s30])=>{
+const shipTotal={}; S.shipProductMonth.rows.forEach(([n,v])=> shipTotal[n]=U.sum(v));
+const STOCK = S.stock.map(([c,n,rg,cat,ob,fba,res,s30,idle])=>{
   const isUS = rg==='US', st = isUS?fba:ob;
   const daily = isUS ? (s30||0)/30 : (shipTotal[SHIP_MAP[n]]||0)/DOM_DAYS;
-  return { n, isUS, st, daily, runway: daily>0 ? st/daily : null, th: isUS?TH_US:TH_DOM };
+  const th = isUS?TH_US:TH_DOM;
+  const runway = daily>0 ? st/daily : null;
+  return { code:c, n, cat, isUS, st, res, s30, idle:idle||0, daily, runway, th,
+           tier: runway==null ? 'none' : (runway<=th ? 'urgent' : (runway<=th+14 ? 'watch' : 'ok')) };
 });
-const urg = stock.filter(s=>s.runway!=null && s.runway<=s.th);
-const wat = stock.filter(s=>s.runway!=null && s.runway>s.th && s.runway<=s.th+14);
-const domStock = U.sum(stock.filter(s=>!s.isUS),s=>s.st);
-const usStock  = U.sum(stock.filter(s=>s.isUS),s=>s.st);
+const URG = STOCK.filter(s=>s.tier==='urgent'), WAT = STOCK.filter(s=>s.tier==='watch');
+
+// 발주중 수량 매핑
+const onOrder = {};
+S.purchaseOrders.forEach(([n,q])=> onOrder[n] = (onOrder[n]||0) + q);
 
 /* ==========================================================
-   렌더 (환율에 의존 → FX 로드 후 호출)
+   렌더
    ========================================================== */
 function renderAll(){
   const FX = CONFIG.fxUSDKRW;
 
-  /* --- 채널별 당일 / 월누적 / 연누적 (원화 기준) --- */
-  const amzYTD_usd = U.sum(amzDaily, r=>r[3]);
-  const amzMTD_usd = U.sum(amzDaily.filter(r=>r[0].startsWith(CUR_M)), r=>r[3]);
-  const ownLast = SNAP.ownDay(OWN_LAST);
-  const ownPrev = SNAP.ownDay(SNAP.ownDates[SNAP.ownDates.length-2]);
-  const ownMTD  = SNAP.ownRange(CUR_M+'-01');
-  const ownYTD  = SNAP.ownRange();
+  /* ---- 채널별 기간 집계 ---- */
+  const wkFrom = WEEK.from(BASE), pwFrom = WEEK.prevFrom(BASE), pwTo = WEEK.prevTo(BASE);
 
-  const ch = {
-    amazon: { day: amzToday[3]*FX, mtd: amzMTD_usd*FX, ytd: amzYTD_usd*FX,
-              dayUSD: amzToday[3], mtdUSD: amzMTD_usd, ytdUSD: amzYTD_usd, hasDaily:true },
-    b2b:    { day: null, mtd: b2bM[CUR_M]||0, ytd: U.sum(SNAP.b2bAccounts,a=>U.sum(a[1])), hasDaily:false },
-    own:    { day: ownLast.gross, mtd: ownMTD.gross, ytd: ownYTD.gross, hasDaily:true },
-    group:  { day: null, mtd: null, ytd: null, hasDaily:false, pending:true },
+  const amzWk  = amzRange(wkFrom, BASE),  amzPw = amzRange(pwFrom, pwTo);
+  const amzMtd = amzRange(CUR_M+'-01'),   amzYtd = amzRange();
+  const ownWk  = S.ownRange(wkFrom, BASE), ownPw = S.ownRange(pwFrom, pwTo);
+  const ownMtd = S.ownRange(CUR_M+'-01'),  ownYtd = S.ownRange();
+  const b2bWk  = S.b2bRange(wkFrom, BASE), b2bPw = S.b2bRange(pwFrom, pwTo);
+  const b2bMtd = S.b2bRange(CUR_M+'-01'),  b2bYtd = S.b2bRange();
+
+  const CH = {
+    amazon: { wk:amzWk.usd*FX, pw:amzPw.usd*FX, mtd:amzMtd.usd*FX, ytd:amzYtd.usd*FX,
+              wkUSD:amzWk.usd, mtdUSD:amzMtd.usd, ytdUSD:amzYtd.usd },
+    own:    { wk:ownWk.gross,  pw:ownPw.gross,  mtd:ownMtd.gross, ytd:ownYtd.gross },
+    b2b:    { wk:b2bWk.rev,    pw:b2bPw.rev,    mtd:b2bMtd.rev,   ytd:b2bYtd.rev },
+    group:  { wk:null, pw:null, mtd:null, ytd:null },
   };
+  const totWk = CH.amazon.wk + CH.own.wk + CH.b2b.wk;
+  const totPw = CH.amazon.pw + CH.own.pw + CH.b2b.pw;
+  const totMtd= CH.amazon.mtd + CH.own.mtd + CH.b2b.mtd;
+  const totYtd= CH.amazon.ytd + CH.own.ytd + CH.b2b.ytd;
+  const dWk = U.delta(totWk, totPw);
 
-  /* --- 일간 통합 실적 스트립 --- */
-  const totDay = ch.amazon.day + ch.own.day;          // 일간 실측 채널 (아마존 + 자사몰)
-  const totMTD = ch.amazon.mtd + ch.b2b.mtd + ch.own.mtd;
-  const totYTD = ch.amazon.ytd + ch.b2b.ytd + ch.own.ytd;
-  const dDay = U.delta(amzToday[3], amzPrev[3]);
-  const dOwn = U.delta(ownLast.gross, ownPrev.gross);
+  /* ---- 통합 실적 스트립 ---- */
+  g('ttl-day').textContent = `아마존 ${AMZ_LAST} · 자사몰 ${OWN_LAST} · B2B ${S.b2bLastDay}`;
+  g('strip-sub').innerHTML = `최근 7일 = ${wkFrom} ~ ${BASE} · 환율 $1 = ${FX.toLocaleString('ko-KR')}원`;
 
-  g('ttl-day').textContent = `아마존 ${LAST_DAY} · 자사몰 ${OWN_LAST}`;
-  g('strip-sub').innerHTML =
-    `아마존 ${LAST_DAY} (한국 기준 -2일) · 자사몰 ${OWN_LAST} · 환율 $1 = ${FX.toLocaleString('ko-KR')}원 ·
-     <span style="color:#C9A227">B2B는 일자별 원천 없음 (월간만)</span>`;
+  g('t-wk').textContent  = U.krwM(totWk)+'원';
+  g('t-wk-s').innerHTML  = `<span class="${dWk.cls}">${dWk.tx}</span> 전주 대비 (${U.krwM(totPw)}원)`;
+  g('t-mtd').textContent = U.krwM(totMtd)+'원';
+  g('t-mtd-s').innerHTML = `아마존 ${U.krwM(CH.amazon.mtd)} · 자사몰 ${U.krwM(CH.own.mtd)} · B2B ${U.krwM(CH.b2b.mtd)}`;
+  g('t-ytd').textContent = U.krwM(totYtd)+'원';
+  g('t-ytd-s').innerHTML = `아마존 ${(CH.amazon.ytd/totYtd*100).toFixed(0)}% · 자사몰 ${(CH.own.ytd/totYtd*100).toFixed(0)}% · B2B ${(CH.b2b.ytd/totYtd*100).toFixed(0)}%`;
 
-  g('t-day-rev').innerHTML = U.krw(totDay);
-  g('t-day-s').innerHTML =
-    `아마존 ${U.krwM(ch.amazon.day)} (<span class="${dDay.cls}">${dDay.tx}</span>) ·
-     자사몰 ${U.krwM(ch.own.day)} (<span class="${dOwn.cls}">${dOwn.tx}</span>)`;
+  /* ---- 4개 파트 ---- */
+  const kpi = (l,v,s) => `<div><div class="l">${l}</div><div class="v">${v}${s?`<small>${s}</small>`:''}</div></div>`;
+  const top3 = (list, fmt, empty='데이터 없음') => !list.length
+    ? `<div style="font-size:11.5px;color:var(--tx-3);padding:10px 0;text-align:center">${empty}</div>`
+    : `<div class="top3">${list.slice(0,3).map((x,i)=>`
+        <div class="top3-i"><span class="top3-n">${i+1}</span>
+          <span class="top3-nm">${x.n}</span>
+          ${x.qty!=null?`<span class="top3-q">${x.qty}개</span>`:''}
+          <span class="top3-v">${fmt(x.rev)}</span>
+        </div>`).join('')}</div>`;
 
-  g('t-mtd').innerHTML = U.krwM(totMTD)+'원';
-  g('t-mtd-s').innerHTML =
-    `아마존 ${U.krwM(ch.amazon.mtd)} · 자사몰 ${U.krwM(ch.own.mtd)} · B2B ${ch.b2b.mtd?U.krwM(ch.b2b.mtd):'0'}`;
-
-  g('t-ytd').innerHTML = U.krwM(totYTD)+'원';
-  g('t-ytd-s').innerHTML =
-    `아마존 ${(ch.amazon.ytd/totYTD*100).toFixed(0)}% · 자사몰 ${(ch.own.ytd/totYTD*100).toFixed(0)}% · B2B ${(ch.b2b.ytd/totYTD*100).toFixed(0)}%`;
-
-  /* --- TOP3 계산 --- */
-  // 아마존: 시트 [매출액]/[주문수량] 탭의 날짜 × 제품 실측
-  const amzTop3 = SNAP.amazonDayProducts(LAST_DAY).slice(0,3);
-
-  // 자사몰: 당일 제품별 실측 (시트 [2_계산] 주문라인 원본)
-  const ownTop3 = SNAP.ownDayProducts(OWN_LAST).slice(0,3);
-
-  // B2B: 제품 데이터 없음 → 거래처 TOP3 (연누적)
-  const b2bTop3 = SNAP.b2bAccounts.map(([n,v])=>({ n, rev:U.sum(v) }))
-    .sort((a,b)=>b.rev-a.rev).slice(0,3).filter(x=>x.rev>0);
-
-  /* --- 4개 파트 렌더 --- */
-  const kpi = (l, main, sub) => `<div><div class="l">${l}</div><div class="v">${main}${sub?`<small>${sub}</small>`:''}</div></div>`;
-  const top3html = (list, fmt, badge, empty) => {
-    if(!list.length) return `<div style="font-size:11.5px;color:var(--tx-3);padding:8px 0;text-align:center">${empty}</div>`;
-    return `<div class="top3">${list.map((x,i)=>`
-      <div class="top3-i">
-        <span class="top3-n">${i+1}</span>
-        <span class="top3-nm">${x.n}</span>
-        ${x.qty!=null?`<span class="top3-q">${x.qty}개</span>`:''}
-        <span class="top3-v">${fmt(x.rev)}</span>
-      </div>`).join('')}</div>`;
-  };
+  const dAmz = U.delta(amzWk.usd, amzPw.usd);
+  const dOwn = U.delta(ownWk.gross, ownPw.gross);
+  const dB2b = U.delta(b2bWk.rev, b2bPw.rev);
 
   g('parts').innerHTML = `
-    <!-- 파트1 아마존 -->
     <div class="part p-amz">
-      <div class="part-h">
-        <div class="ico">🛒</div>
-        <div class="t"><h4>아마존 US 일간 실적</h4><div class="d">${LAST_DAY} · 한국 -2일 기준</div></div>
-        <span class="bdg bdg-good">일간 실데이터</span>
-      </div>
+      <div class="part-h"><div class="ico">🛒</div>
+        <div class="t"><h4>아마존 US</h4><div class="d">${AMZ_LAST} · 한국 -2일</div></div>
+        <span class="bdg bdg-good">일간 실측</span></div>
       <div class="part-k">
-        ${kpi('당일 매출', U.usd2(ch.amazon.dayUSD), U.krw(ch.amazon.day))}
-        ${kpi('월 누적',   U.usd(ch.amazon.mtdUSD),  U.krwM(ch.amazon.mtd)+'원')}
-        ${kpi('연 누적',   U.usd(ch.amazon.ytdUSD),  U.krwM(ch.amazon.ytd)+'원')}
+        ${kpi('주간 매출', U.usd(amzWk.usd), U.krwM(CH.amazon.wk)+'원')}
+        ${kpi('월 누적',   U.usd(amzMtd.usd), U.krwM(CH.amazon.mtd)+'원')}
+        ${kpi('연 누적',   U.usd(amzYtd.usd), U.krwM(CH.amazon.ytd)+'원')}
       </div>
       <div class="part-top">
-        <div class="th"><span>매출 TOP3 (일일)</span><span class="bdg bdg-good">실측</span></div>
-        ${top3html(amzTop3, v=>U.usd2(v), true, '당일 매출 없음')}
-        <div style="font-size:10px;color:var(--tx-3);margin-top:8px;line-height:1.5">
-          시트 <b>[매출액] · [주문수량]</b> 탭의 날짜 × 제품 매트릭스 실측값입니다.
-        </div>
+        <div class="th"><span>매출 TOP3 (주간)</span><span class="bdg bdg-good">실측</span></div>
+        ${top3(S.amazonProductsRange(wkFrom, BASE), v=>U.usd2(v))}
       </div>
-      <div class="part-go">
-        <a href="sales.html#amazon">일간 상세 보기 →</a>
-        <span style="font-size:10.5px;color:var(--tx-3)">PV ${U.num(amzToday[1])} · 전환 ${(amzToday[2]/amzToday[1]*100).toFixed(2)}%</span>
-      </div>
+      <div class="part-go"><a href="sales.html#amazon">일간 상세 →</a>
+        <span style="font-size:10.5px;color:var(--tx-3)">WoW <b class="${dAmz.cls}">${dAmz.tx}</b></span></div>
     </div>
 
-    <!-- 파트2 B2B -->
     <div class="part p-b2b">
-      <div class="part-h">
-        <div class="ico">🤝</div>
-        <div class="t"><h4>B2B 일간 실적</h4><div class="d">거래처 4곳 · VAT 포함</div></div>
-        <span class="bdg bdg-warn">월간만</span>
-      </div>
+      <div class="part-h"><div class="ico">🤝</div>
+        <div class="t"><h4>B2B</h4><div class="d">${S.b2bLastDay} · VAT 포함</div></div>
+        <span class="bdg bdg-good">일간 실측</span></div>
       <div class="part-k">
-        ${kpi('당일 매출', '—', '일자별 원천 없음')}
-        ${kpi('월 누적',   ch.b2b.mtd?U.krwM(ch.b2b.mtd)+'원':'0원', CUR_M)}
-        ${kpi('연 누적',   U.krwM(ch.b2b.ytd)+'원', '2026 YTD')}
+        ${kpi('주간 매출', b2bWk.rev?U.krwM(b2bWk.rev)+'원':'0원', `${b2bWk.lines}건`)}
+        ${kpi('월 누적',   U.krwM(b2bMtd.rev)+'원', `${b2bMtd.lines}건`)}
+        ${kpi('연 누적',   U.krwM(b2bYtd.rev)+'원', `${b2bYtd.accounts}곳`)}
       </div>
       <div class="part-top">
-        <div class="th"><span>매출 TOP3 (거래처)</span><span class="bdg bdg-mute">제품 데이터 없음</span></div>
-        ${top3html(b2bTop3, v=>U.krwM(v)+'원', false, '매출 발생 거래처 없음')}
-        <div style="font-size:10px;color:var(--tx-3);margin-top:8px;line-height:1.5">
-          ※ B2B 시트는 <b>거래처 × 월</b> 구조라 제품별·일자별 분해가 불가합니다.
-          시트에 <b>주문일자</b>와 <b>품목</b> 열을 추가하면 일간 실적과 제품 TOP3가 켜집니다.
-        </div>
+        <div class="th"><span>매출 TOP3 (제품 · YTD)</span><span class="bdg bdg-good">실측</span></div>
+        ${top3(S.b2bProductsRange(), v=>U.krwM(v)+'원')}
       </div>
-      <div class="part-go">
-        <a href="sales.html#b2b">상세 보기 →</a>
-        <span style="font-size:10.5px;color:var(--tx-3)">거래 ${b2bTop3.length} / ${SNAP.b2bAccounts.length}곳</span>
-      </div>
+      <div class="part-go"><a href="sales.html#b2b">상세 →</a>
+        <span style="font-size:10.5px;color:var(--tx-3)">샘플 ${U.krwM(b2bYtd.sample)}원 (매출 제외)</span></div>
     </div>
 
-    <!-- 파트3 자사몰 -->
     <div class="part p-own">
-      <div class="part-h">
-        <div class="ico">🏠</div>
-        <div class="t"><h4>자사몰 일간 실적</h4><div class="d">${OWN_LAST} · 카페24 정가매출</div></div>
-        <span class="bdg bdg-good">일간 실측</span>
-      </div>
+      <div class="part-h"><div class="ico">🏠</div>
+        <div class="t"><h4>자사몰 (카페24)</h4><div class="d">${OWN_LAST} · 정가매출</div></div>
+        <span class="bdg bdg-good">일간 실측</span></div>
       <div class="part-k">
-        ${kpi('당일 매출', U.krwM(ch.own.day)+'원', `${ownLast.orders}건 · ${ownLast.qty}개`)}
-        ${kpi('월 누적',   U.krwM(ch.own.mtd)+'원', `${ownMTD.orders}건`)}
-        ${kpi('연 누적',   U.krwM(ch.own.ytd)+'원', `${ownYTD.orders}건`)}
+        ${kpi('주간 매출', U.krwM(ownWk.gross)+'원', `${ownWk.orders}건`)}
+        ${kpi('월 누적',   U.krwM(ownMtd.gross)+'원', `${ownMtd.orders}건`)}
+        ${kpi('연 누적',   U.krwM(ownYtd.gross)+'원', `${ownYtd.orders}건`)}
       </div>
       <div class="part-top">
-        <div class="th"><span>매출 TOP3 (일일)</span><span class="bdg bdg-good">실측</span></div>
-        ${top3html(ownTop3, v=>U.krwM(v)+'원', false, '당일 매출 없음')}
-        <div style="font-size:10px;color:var(--tx-3);margin-top:8px;line-height:1.5">
-          시트 <b>[2_계산]</b> 주문라인 원본 집계 · <b>일반주문 기준</b> (임직원 제외).
-        </div>
+        <div class="th"><span>매출 TOP3 (주간)</span><span class="bdg bdg-good">실측</span></div>
+        ${top3(S.ownProductsRange(wkFrom, BASE), v=>U.krwM(v)+'원', '주간 매출 없음')}
       </div>
-      <div class="part-go">
-        <a href="sales.html#own">일간 상세 보기 →</a>
-        <span style="font-size:10.5px;color:var(--tx-3)">임직원 ${(ownYTD.staff/ownYTD.gross*100).toFixed(1)}%</span>
-      </div>
+      <div class="part-go"><a href="sales.html#own">일간 상세 →</a>
+        <span style="font-size:10.5px;color:var(--tx-3)">WoW <b class="${dOwn.cls}">${dOwn.tx}</b></span></div>
     </div>
 
-    <!-- 파트4 공동구매 -->
     <div class="part p-grp">
-      <div class="part-h">
-        <div class="ico">💊</div>
-        <div class="t"><h4>공동구매 일간 실적</h4><div class="d">국내공구 (약사님)</div></div>
-        <span class="bdg bdg-mute">미연결</span>
-      </div>
+      <div class="part-h"><div class="ico">💊</div>
+        <div class="t"><h4>공동구매 (약사님)</h4><div class="d">국내공구</div></div>
+        <span class="bdg bdg-mute">준비중</span></div>
       <div class="part-k">
-        ${kpi('당일 매출', '—', '')}
-        ${kpi('월 누적',   '—', '')}
-        ${kpi('연 누적',   '—', '')}
+        ${kpi('주간 매출','—','')}${kpi('월 누적','—','')}${kpi('연 누적','—','')}
       </div>
       <div class="part-top">
-        <div class="th"><span>매출 TOP3 (일일)</span><span class="bdg bdg-mute">소스 없음</span></div>
-        <div class="empty" style="padding:20px 12px">
+        <div class="th"><span>매출 TOP3</span><span class="bdg bdg-mute">—</span></div>
+        <div class="empty" style="padding:22px 12px">
           <div class="big" style="font-size:22px">💊</div>
-          <b>매출 데이터 미입력</b>
-          시트가 준비되면 <code style="font-size:10px">SOURCES.groupBuy</code>에<br>ID·GID만 넣으면 자동 반영됩니다.
+          <b>공동구매 준비중</b>
         </div>
       </div>
-      <div class="part-go">
-        <a href="sales.html#group" style="color:var(--tx-3)">상세 보기 →</a>
-        <span style="font-size:10.5px;color:var(--tx-3)">준비 중</span>
+      <div class="part-go"><a href="#" style="color:var(--tx-3);pointer-events:none">준비중</a>
+        <span style="font-size:10.5px;color:var(--tx-3)">—</span></div>
+    </div>`;
+
+  renderMarketing(CH, FX, wkFrom);
+  renderInventory();
+  renderSignals(CH, totYtd, totWk, totPw, FX);
+}
+
+/* ==================== 02 마케팅 성과 ==================== */
+function renderMarketing(CH, FX, wkFrom){
+  const A = S.adsChannels;
+  const amzSP = A.find(x=>x[0]==='Amazon SP'), meta = A.find(x=>x[0]==='Meta');
+  const spend = U.sum(A, x=>x[3]);
+  const adRev = U.sum(A, x=>x[7]);
+  const imp   = U.sum(A, x=>x[1]);
+  const clk   = U.sum(A, x=>x[2]);
+  const pv    = U.sum(A, x=>x[4]);
+  const cart  = U.sum(A, x=>x[5]);
+  const buy   = U.sum(A, x=>x[6]);
+
+  g('ch-hint').textContent = `광고 데이터: 아마존 마케팅 리포트 ver.5 (전체기간)`;
+
+  /* 채널별 성과 표 */
+  const rows = [
+    ['자사몰 (D2C)',   'own',    CH.own,    0,            null],
+    ['Amazon US (FBA)','amazon', CH.amazon, spend*FX,     adRev*FX],
+    ['B2B',            'b2b',    CH.b2b,    0,            null],
+    ['국내 공구 (약사님)','group', CH.group, 0,            null],
+  ];
+  const tot = { wk:U.sum(rows,r=>r[2].wk||0), pw:U.sum(rows,r=>r[2].pw||0),
+                mtd:U.sum(rows,r=>r[2].mtd||0), ytd:U.sum(rows,r=>r[2].ytd||0), ad:spend*FX };
+
+  g('tb-ch').innerHTML =
+    `<thead><tr><th>채널</th><th>주간 매출</th><th>WoW</th><th>월 누적</th><th>연 누적</th><th>매출 비중</th><th>광고비</th><th>ROAS</th><th>비고</th></tr></thead><tbody>
+    ${rows.map(([n,k,c,ad,ar])=>{
+      const d = c.wk==null ? {cls:'flat',tx:'—'} : U.delta(c.wk, c.pw);
+      const roas = ad ? (c.ytd/ad*100) : null;
+      const note = k==='group' ? '<span class="bdg bdg-mute">준비중</span>'
+        : k==='amazon' ? `<span class="bdg ${roas>=167?'bdg-good':'bdg-bad'}">채널 ROAS ${roas.toFixed(0)}%</span>`
+        : k==='b2b' ? '<span class="bdg bdg-info">광고 미집행</span>'
+        : '<span class="bdg bdg-info">광고 미귀속</span>';
+      return `<tr><td>● ${n}</td>
+        <td>${c.wk==null?'—':U.krwM(c.wk)}</td>
+        <td class="${d.cls}">${d.tx}</td>
+        <td>${c.mtd==null?'—':U.krwM(c.mtd)}</td>
+        <td>${c.ytd==null?'—':`<b style="color:var(--tx)">${U.krwM(c.ytd)}</b>`}</td>
+        <td>${c.ytd==null?'—':(c.ytd/tot.ytd*100).toFixed(1)+'%'}</td>
+        <td>${ad?U.krwM(ad):'—'}</td>
+        <td>${roas!=null?`<b style="color:${roas>=167?'var(--good)':'var(--bad)'}">${roas.toFixed(0)}%</b>`:'—'}</td>
+        <td style="text-align:left">${note}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계</td><td>${U.krwM(tot.wk)}</td>
+      <td class="${U.delta(tot.wk,tot.pw).cls}">${U.delta(tot.wk,tot.pw).tx}</td>
+      <td>${U.krwM(tot.mtd)}</td><td>${U.krwM(tot.ytd)}</td><td>100%</td>
+      <td>${U.krwM(tot.ad)}</td><td>${(tot.ytd/tot.ad*100).toFixed(0)}%</td><td></td></tr>
+    </tbody>`;
+
+  /* 유료 광고 집행 */
+  const row = (k,v,s='') => `<div class="mkrow"><span class="k">${k}</span><span class="dots"></span>
+    <span class="v">${v}${s?`<small>${s}</small>`:''}</span></div>`;
+  g('mk-paid').innerHTML =
+    row('아마존 PPC', U.usd2(amzSP[3]), `ROAS ${(amzSP[7]/amzSP[3]*100).toFixed(0)}%`) +
+    row('메타 (IG/FB)', U.usd2(meta[3]), `ROAS ${(meta[7]/meta[3]*100).toFixed(0)}%`) +
+    row('총 광고비', U.usd2(spend), `${U.krwM(spend*FX)}원`) +
+    row('광고 전환매출', U.usd2(adRev), `${U.krwM(adRev*FX)}원`) +
+    row('통합 ROAS', `${(adRev/spend*100).toFixed(1)}%`, `BEP 167%`) +
+    row('예산 소진율', `${(spend*FX/S.adsBudgetKRW*100).toFixed(1)}%`, `예산 ${U.krwM(S.adsBudgetKRW)}원`);
+
+  /* 트래픽 · 전환 */
+  const amzYtd = amzRange();
+  g('mk-traffic').innerHTML =
+    row('노출 / 도달', U.num(imp)) +
+    row('클릭', U.num(clk), `CTR ${(clk/imp*100).toFixed(2)}%`) +
+    row('페이지뷰 (광고)', U.num(pv)) +
+    row('장바구니', U.num(cart)) +
+    row('구매 (광고귀속)', U.num(buy), `CVR ${(buy/clk*100).toFixed(2)}%`) +
+    row('광고 귀속률', `${(adRev/amzYtd.usd*100).toFixed(1)}%`, `아마존 실매출 대비`) +
+    row('객단가 (AOV)', U.usd2(adRev/buy), `광고 기준`);
+
+  /* 상품별 ROAS */
+  const P = [...S.adsProducts].sort((a,b)=>b[3]-a[3]);
+  g('mk-prod').innerHTML = P.map(p=>{
+    const roas = p[7]/p[3]*100;
+    return `<div class="mkrow"><span class="k" style="color:var(--tx);font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px">${p[0]}</span>
+      <span class="dots"></span>
+      <span class="v"><span style="color:var(--tx-3);font-weight:600">${U.usd2(p[3])}</span>
+      <b style="margin-left:6px;color:${roas>=167?'var(--good)':(roas>=80?'var(--warn)':'var(--bad)')}">${roas.toFixed(0)}%</b></span></div>`;
+  }).join('');
+}
+
+/* ==================== 03 재고 ==================== */
+function renderInventory(){
+  g('inv-rt').textContent = `아워박스 ${S.stockAsOf.ourbox} · 아마존 ${S.stockAsOf.amazon}`;
+
+  /* 발주 알람 */
+  const alerts = [...URG, ...WAT].sort((a,b)=>a.runway-b.runway);
+  g('po-alert').innerHTML = !URG.length ? '' : `
+    <div class="alert bad" style="align-items:flex-start">
+      <span class="ico">🚨</span>
+      <div style="flex:1">
+        <b>즉시 발주 필요 — ${URG.length}개 SKU</b><br>
+        <span style="color:var(--tx-3);font-size:11.5px">리드타임+안전버퍼 내 품절 확정. 발주중 수량이 있어도 입고일이 늦으면 공백이 생깁니다.</span>
+        <div style="margin-top:10px;display:grid;gap:7px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+        ${URG.map(s=>{
+          const po = S.purchaseOrders.find(p=>p[0]===s.n.replace('[US] ',''));
+          return `<div style="background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <div style="min-width:0">
+                <div style="font-size:12px;font-weight:700;color:var(--tx)">${s.n}</div>
+                <div style="font-size:10.5px;color:var(--tx-3)">재고 ${U.num(s.st)} · 일평균 ${s.daily.toFixed(1)}</div>
+              </div>
+              <div style="text-align:right;flex-shrink:0">
+                <div style="font-size:17px;font-weight:780;color:var(--bad)">${Math.round(s.runway)}일</div>
+                <div style="font-size:10px;color:var(--tx-3)">소진 예상</div>
+              </div>
+            </div>
+            ${po ? `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--tx-2)">
+              발주중 <b>${U.num(po[1])}개</b> · 입고예정 <b>${po[3]}</b>
+              <span class="bdg bdg-bad" style="margin-left:6px">입고까지 ${Math.round((new Date(po[3])-new Date(S.stockAsOf.amazon))/86400000)}일</span></div>`
+             : `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)">
+              <span class="bdg bdg-bad">발주 미등록</span></div>`}
+          </div>`;
+        }).join('')}
+        </div>
       </div>
     </div>`;
 
-  /* --- 마케팅/재고 요약 --- */
-  g('m-spend').textContent = U.usd(adT.spend);
-  g('m-roas').textContent  = adT.roas.toFixed(0)+'%';
-  g('m-cpa').textContent   = U.usd2(adT.cpa);
-  g('m-buy').textContent   = U.num(adT.buy);
-  g('i-dom').textContent   = U.num(domStock);
-  g('i-us').textContent    = U.num(usStock);
-  g('i-urg').innerHTML     = `<span style="color:${urg.length?'var(--bad)':'var(--good)'}">${urg.length}</span>`;
-  g('i-wat').innerHTML     = `<span style="color:${wat.length?'var(--warn)':'var(--good)'}">${wat.length}</span>`;
+  /* 발주 현황 표 */
+  const today = new Date(S.stockAsOf.ourbox);
+  g('tb-po').innerHTML =
+    `<thead><tr><th>제품명</th><th>수량</th><th>발주일</th><th>입고예정일</th><th>D-Day</th><th>상태</th></tr></thead><tbody>
+    ${S.purchaseOrders.map(([n,q,od,eta])=>{
+      const d = Math.round((new Date(eta)-today)/86400000);
+      const late = d < 0;
+      return `<tr><td>${n}</td><td>${U.num(q)}</td><td>${od}</td><td>${eta}</td>
+        <td><b style="color:${late?'var(--bad)':(d<=14?'var(--warn)':'var(--tx-2)')}">${late?`+${-d}일 지연`:`D-${d}`}</b></td>
+        <td style="text-align:left">${late?'<span class="bdg bdg-bad">입고 지연</span>'
+          :(d<=14?'<span class="bdg bdg-warn">임박</span>':'<span class="bdg bdg-info">발주중</span>')}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계 (발주중)</td><td>${U.num(U.sum(S.purchaseOrders,p=>p[1]))}</td><td colspan="4"></td></tr>
+    </tbody>`;
 
-  /* --- 시그널 --- */
-  renderSignals(ch, totYTD, FX);
+  /* 발주 필요 알람 */
+  const need = S.reorderNeed;
+  g('po-need').innerHTML = `
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>품목</th><th>발주필요(H2예측)</th><th>발주중</th><th>순발주필요</th></tr></thead>
+      <tbody>${need.map(([n,a,b,c])=>`<tr><td>${n}</td><td>${U.num(a)}</td><td>${U.num(b)}</td>
+        <td><b style="color:${c>0?'var(--bad)':'var(--good)'}">${c>0?U.num(c):'0 (충족)'}</b></td></tr>`).join('')}
+      </tbody></table></div>
+    ${WAT.length ? `<div class="alert warn" style="margin:12px 0 0"><span class="ico">⚠️</span>
+      <div><b>발주 검토 ${WAT.length}개</b> — ${WAT.map(s=>`${s.n} (${Math.round(s.runway)}일)`).join(', ')}</div></div>` : ''}
+    ${!URG.length && !WAT.length ? `<div class="alert info" style="margin:12px 0 0"><span class="ico">✅</span>
+      <div>현재 기준 발주 위험 SKU 없음.</div></div>` : ''}`;
 
-  /* --- 믹스 차트 --- */
-  const mat = MONTHS.map(mo=>({
-    m:mo, amazon:(amzM[mo]?.usd||0)*FX, own:(ownM[mo]?.[3]||0), b2b:(b2bM[mo]||0),
-  }));
-  g('mix-hint').textContent = `원화 환산 · $1 = ${FX.toLocaleString('ko-KR')}원`;
-  if(window._mix) window._mix.destroy();
-  window._mix = new Chart(g('c-home'), {
-    type:'bar',
-    data:{ labels:mat.map(r=>r.m.slice(5)+'월'),
-      datasets:[
-        { label:'아마존 US', data:mat.map(r=>r.amazon), backgroundColor:CH.cyan,   borderRadius:5, barPercentage:.68 },
-        { label:'자사몰',    data:mat.map(r=>r.own),    backgroundColor:CH.mint,   borderRadius:5, barPercentage:.68 },
-        { label:'B2B',       data:mat.map(r=>r.b2b),    backgroundColor:CH.purple, borderRadius:5, barPercentage:.68 },
-      ]},
-    options: CH.base({
-      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#7C8891',font:{size:11}},border:{color:'#D8DEE1'}},
-        y:{stacked:true,grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000).toLocaleString()+'만'}} },
-      plugins:{ ...CH.base().plugins,
-        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.dataset.label}: ${U.krw(c.parsed.y)}` } } },
-    })
-  });
+  /* 국내 9종 (RRP 제외) */
+  const DOM = STOCK.filter(s=>!s.isUS && s.cat!=='RRP');
+  g('tb-dom').innerHTML =
+    `<thead><tr><th>제품명</th><th>가용재고</th><th>발송대기</th><th>일평균</th><th>소진예상</th><th>발주중</th><th>상태</th></tr></thead><tbody>
+    ${[...DOM].sort((a,b)=>(a.runway??1e9)-(b.runway??1e9)).map(s=>{
+      const po = onOrder[s.n]||0;
+      const c = s.tier==='urgent'?'var(--bad)':(s.tier==='watch'?'var(--warn)':'var(--tx-2)');
+      return `<tr><td>${s.n}</td><td><b style="color:var(--tx)">${U.num(s.st)}</b></td>
+        <td>${s.idle?U.num(s.idle):'—'}</td><td>${s.daily.toFixed(1)}</td>
+        <td><b style="color:${c}">${s.runway?Math.round(s.runway)+'일':'—'}</b></td>
+        <td>${po?U.num(po):'—'}</td>
+        <td style="text-align:left">${s.tier==='urgent'?'<span class="bdg bdg-bad">🚨 즉시</span>'
+          :(s.tier==='watch'?'<span class="bdg bdg-warn">⚠️ 검토</span>':'<span class="bdg bdg-good">✅ 안전</span>')}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계</td><td>${U.num(U.sum(DOM,s=>s.st))}</td><td>${U.num(U.sum(DOM,s=>s.idle))}</td>
+      <td colspan="4"></td></tr></tbody>`;
+
+  /* 아마존 */
+  const US = STOCK.filter(s=>s.isUS);
+  g('tb-us').innerHTML =
+    `<thead><tr><th>제품명</th><th>FBA 가용</th><th>예약중</th><th>30일 판매</th><th>일평균</th><th>소진예상</th><th>상태</th></tr></thead><tbody>
+    ${[...US].sort((a,b)=>(a.runway??1e9)-(b.runway??1e9)).map(s=>{
+      const c = s.tier==='urgent'?'var(--bad)':(s.tier==='watch'?'var(--warn)':'var(--tx-2)');
+      return `<tr><td>${s.n.replace('[US] ','')}</td><td><b style="color:var(--tx)">${U.num(s.st)}</b></td>
+        <td>${U.num(s.res)}</td><td>${U.num(s.s30)}</td><td>${s.daily.toFixed(1)}</td>
+        <td><b style="color:${c}">${s.runway?Math.round(s.runway)+'일':'판매 없음'}</b></td>
+        <td style="text-align:left">${s.tier==='urgent'?'<span class="bdg bdg-bad">🚨 즉시</span>'
+          :(s.tier==='watch'?'<span class="bdg bdg-warn">⚠️ 검토</span>':'<span class="bdg bdg-good">✅ 안전</span>')}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계</td><td>${U.num(U.sum(US,s=>s.st))}</td><td>${U.num(U.sum(US,s=>s.res))}</td>
+      <td>${U.num(U.sum(US,s=>s.s30))}</td><td colspan="3"></td></tr></tbody>`;
 }
 
-function renderSignals(ch, totYTD, FX){
-  const jun = { amazon:(amzM['2026-06']?.usd||0)*FX, own:ownM['2026-06']?.[3]||0, b2b:b2bM['2026-06']||0 };
-  const junT = jun.amazon+jun.own+jun.b2b;
-  const julT = ch.amazon.mtd + ch.own.mtd + ch.b2b.mtd;
-  const dayOfM = +LAST_DAY.slice(8);
-  const julProj = julT / dayOfM * 31;
-  const seeding = U.sum(SNAP.shipChannelMonth.rows.find(r=>r[0]==='마케팅 시딩')[1]);
-  const shipGrand = U.sum(SNAP.shipChannelMonth.rows, r=>U.sum(r[1]));
+/* ==================== 04 시그널 ==================== */
+function renderSignals(CH, totYtd, totWk, totPw, FX){
+  const serum = STOCK.find(s=>s.n==='[US] NMN 인텐시브 세럼');
+  const po = S.purchaseOrders.find(p=>p[0]==='NMN 인텐시브 세럼');
+  const gapDays = Math.round((new Date(po[3]) - new Date(S.stockAsOf.amazon))/86400000) - Math.round(serum.runway);
 
-  const S = [
-    { ico: julProj<junT?'📉':'📈', tone: julProj<junT?'bad':'good',
-      t:'7월 매출, 6월 대비 역성장 전망',
-      d:`6월 통합 ${U.krwM(junT)}원 → 7월 착지 예상 <b>${U.krwM(julProj)}원</b>. 6월은 아마존 6/23~26 프로모션(4일 $27.3k)이 만든 스파이크였고, 7월은 그 기저 위에 서 있습니다.`,
-      a:'7월 남은 기간에 아마존 재프로모션 또는 자사몰 세트 프로모션이 없으면 역성장 확정. 이번 주 안에 결정하세요.' },
-    { ico:'💸', tone: roas30<200?'bad':'warn',
-      t:'광고 예산은 늘었는데 ROAS는 내려감',
-      d:`최근 30일 ROAS <b>${roas30.toFixed(0)}%</b> (전체 평균 ${adT.roas.toFixed(0)}%). 7/10~11 지출을 $287→$536로 올렸지만 ROAS는 133%→86%로 하락. CPC $2.63, CTR 0.58% — 소재 피로 + 오디언스 고갈 패턴입니다.`,
-      a:'예산 증액 전에 소재 3종 이상 신규 투입 + 타겟 확장. 기여마진 60% 기준 BEP는 167%입니다.' },
-    { ico:'💱', tone:'good',
-      t:`환율 ${FX.toLocaleString('ko-KR')}원 — 아마존 매출의 원화 가치 상승`,
-      d:`아마존 연누적 ${U.usd(ch.amazon.ytdUSD)} = <b>${U.krwM(ch.amazon.ytd)}원</b> (통합의 ${(ch.amazon.ytd/totYTD*100).toFixed(0)}%).
-         환율이 1,380원이던 시점 대비 원화 환산 매출이 <b class="up">약 ${U.krwM(ch.amazon.ytdUSD*(FX-1380))}원</b> 늘어난 셈입니다.`,
-      a:'달러 매출 비중이 큰 만큼 환헤지 없이도 지금은 유리합니다. 다만 아마존 광고비도 달러 지출이라 순효과는 마진 기준으로 재계산하세요.' },
+  const spend = U.sum(S.adsChannels, x=>x[3]);
+  const adRev = U.sum(S.adsChannels, x=>x[7]);
+  const roas  = adRev/spend*100;
+  const meta  = S.adsChannels.find(x=>x[0]==='Meta');
+
+  const dWk = U.delta(totWk, totPw);
+
+  const arr = [
+    { ico:'🚨', tone:'bad',
+      t:`아마존 세럼 — 재고 ${Math.round(serum.runway)}일, 입고까지 ${Math.round((new Date(po[3])-new Date(S.stockAsOf.amazon))/86400000)}일`,
+      d:`아마존 매출의 <b>67%</b>를 만드는 <b>NMN 인텐시브 세럼</b>의 FBA 재고가 <b>${U.num(serum.st)}개</b>, 30일 판매 ${U.num(serum.s30)}개 기준 <b>${Math.round(serum.runway)}일치</b>뿐입니다.
+         30,000개 발주는 걸려 있으나 입고예정일이 <b>${po[3]}</b> — <b class="dn">약 ${gapDays}일의 품절 공백</b>이 발생합니다.`,
+      a:`국내 아워박스 재고(${U.num(STOCK.find(s=>s.n==='NMN 인텐시브 세럼').st)}개 + 발송대기 ${U.num(STOCK.find(s=>s.n==='NMN 인텐시브 세럼').idle)}개)에서 <b>항공 특송으로 긴급 FBA 보충</b>하세요. 이번 주 결정 사항입니다.` },
+    { ico:'💸', tone: roas<167?'bad':'warn',
+      t:`통합 ROAS ${roas.toFixed(0)}% — 손익분기(167%) 미달`,
+      d:`광고비 <b>${U.usd2(spend)}</b>를 태워 광고 귀속 매출 <b>${U.usd2(adRev)}</b>. 특히 <b>Meta는 ROAS ${(meta[7]/meta[3]*100).toFixed(1)}%</b>로 사실상 전액 손실입니다
+         (클릭 ${U.num(meta[2])}회 → 구매 ${meta[6]}건, CVR ${(meta[6]/meta[2]*100).toFixed(2)}%).
+         반면 아마존 PPC는 ${(S.adsChannels[0][7]/S.adsChannels[0][3]*100).toFixed(0)}%.`,
+      a:`Meta 예산을 <b>즉시 중단 또는 90% 감액</b>하고 아마존 PPC로 재배분하세요. Meta는 랜딩(아마존 상세페이지) 전환이 안 되는 구조입니다 — 소재가 아니라 <b>퍼널 설계</b> 문제입니다.` },
+    { ico: dWk.v>=0?'📈':'📉', tone: dWk.v>=0?'good':'bad',
+      t:`주간 매출 ${U.krwM(totWk)}원 · 전주 대비 ${dWk.tx}`,
+      d:`아마존 ${U.krwM(CH.amazon.wk)} · 자사몰 ${U.krwM(CH.own.wk)} · B2B ${U.krwM(CH.b2b.wk)}.
+         연 누적 ${U.krwM(totYtd)}원 중 아마존이 <b>${(CH.amazon.ytd/totYtd*100).toFixed(0)}%</b> —
+         사실상 <b>아마존 단일 채널 사업</b>이며, 그 안에서 다시 세럼 1개 SKU가 대부분입니다.`,
+      a:`위험 분산이 시급합니다. B2B는 카드픽 1건(₩3.3M)으로 가능성이 확인됐으니 <b>거래처 파이프라인 확대</b>, 자사몰은 일·월요일 집중 프로모션(요일 매출 1.8배)으로 볼륨을 키우세요.` },
   ];
-  g('signals').innerHTML = S.map(s=>`
+  g('signals').innerHTML = arr.map(s=>`
     <div class="card" style="border-left:3px solid ${s.tone==='bad'?'var(--bad)':(s.tone==='warn'?'var(--warn)':'var(--good)')}">
       <div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:9px">
         <span style="font-size:17px">${s.ico}</span>
-        <h3 style="font-size:13.5px;font-weight:700;line-height:1.4">${s.t}</h3>
+        <h3 style="font-size:13px;font-weight:700;line-height:1.4">${s.t}</h3>
       </div>
       <div style="font-size:12px;color:var(--tx-2);line-height:1.65;margin-bottom:11px">${s.d}</div>
       <div style="font-size:11.5px;color:var(--tx);background:var(--bg-2);border:1px solid var(--line);
@@ -537,25 +661,30 @@ function renderSignals(ch, totYTD, FX){
     </div>`).join('');
 }
 
-/* ---- 소스 상태 ---- */
+/* ==================== 05 소스 상태 ==================== */
 function renderSrc(live){
   const meta = {
-    amazon:   ['아마존 US', '일자별 · 제품별'],
-    ownmall:  ['자사몰 (카페24)', '월별 · 제품별'],
-    b2b:      ['B2B', '거래처 × 월'],
-    ads:      ['메타 광고', '일자별 RAW'],
-    inventory:['재고 · 발주', '현재고 · 출고'],
+    amazon:   ['아마존 US 매출', '일자별 × 제품별', S.amazonDaily[S.amazonDaily.length-1][0]],
+    ownmall:  ['자사몰 (카페24)', '주문라인 원본', S.ownLastDay],
+    b2b:      ['B2B', '주문라인 원본', S.b2bLastDay],
+    ads:      ['메타 광고', '일자별 RAW', CONFIG.dataThrough.ads],
+    inventory:['재고 · 발주', '현재고 · 발주로그', S.stockAsOf.ourbox],
   };
   g('tb-src').innerHTML =
-    `<thead><tr><th>소스</th><th>내용</th><th>상태</th></tr></thead><tbody>
+    `<thead><tr><th>소스</th><th>내용</th><th>최신 데이터</th><th>연동 상태</th></tr></thead><tbody>
     ${Object.entries(SOURCES).map(([k,s])=>{
       const ok = live && SIORE.raw && SIORE.raw[k];
       return `<tr><td><a href="https://docs.google.com/spreadsheets/d/${s.id}/edit" target="_blank"
         style="color:var(--cyan-2);text-decoration:none">${meta[k][0]} ↗</a></td><td>${meta[k][1]}</td>
-        <td style="text-align:left">${ok?'<span class="bdg bdg-good">● 실시간</span>':'<span class="bdg bdg-warn">◐ 스냅샷</span>'}</td></tr>`;
+        <td>${meta[k][2]}</td>
+        <td style="text-align:left">${ok?'<span class="bdg bdg-good">● 실시간</span>'
+          :'<span class="bdg bdg-warn">◐ 스냅샷 (시트 웹 게시 필요)</span>'}</td></tr>`;
     }).join('')}
-    <tr><td>국내공구 (약사)</td><td>미정</td><td style="text-align:left"><span class="bdg bdg-mute">○ 미연결</span></td></tr>
-    <tr><td>환율 API</td><td>USD → KRW</td>
+    <tr><td>아마존 마케팅 리포트 ver.5</td><td>매체별·상품별 광고</td><td>—</td>
+      <td style="text-align:left"><span class="bdg bdg-warn">◐ 스냅샷</span></td></tr>
+    <tr><td>국내공구 (약사님)</td><td>미정</td><td>—</td>
+      <td style="text-align:left"><span class="bdg bdg-mute">○ 미연결</span></td></tr>
+    <tr><td>환율 API</td><td>USD → KRW</td><td>${CONFIG.fxAsOf}</td>
       <td style="text-align:left">${CONFIG.fxSource==='실시간'
         ? `<span class="bdg bdg-good">● ${CONFIG.fxUSDKRW.toLocaleString('ko-KR')}원</span>`
         : `<span class="bdg bdg-warn">◐ 기본값 ${CONFIG.fxUSDKRW.toLocaleString('ko-KR')}원</span>`}</td></tr>
@@ -570,15 +699,14 @@ const go = t => {
   window.scrollTo({top:0, behavior:'smooth'});
 };
 document.querySelectorAll('.nav button').forEach(b=> b.onclick = ()=> go(b.dataset.t));
-document.querySelectorAll('[data-go]').forEach(a=> a.onclick = e=>{ e.preventDefault(); go(a.dataset.go); });
 
 /* ---- 부트 ---- */
 (async()=>{
-  await SIORE.loadFX();            // 당일 환율 먼저
+  g('refresh').textContent = `데이터 갱신: ${CONFIG.refreshedAt}`;
+  await SIORE.loadFX();
   SIORE.renderFX(g('fx'));
-  renderAll();                     // 환율 반영 렌더
-  const res = await SIORE.load();  // 시트 연동 시도
-  SIORE.renderStatus(g('status'));
+  renderAll();
+  const res = await SIORE.load();
   renderSrc(res.mode === 'live');
 })();
 </script>

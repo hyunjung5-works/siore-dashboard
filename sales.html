@@ -214,18 +214,17 @@
     <div class="sec">
       <div class="sec-h"><h2>🤝 B2B 일간 실적</h2><span class="note">거래처 4곳 · VAT 포함</span></div>
       <div class="kpis">
-        <div class="kpi b2b"><div class="kpi-l">당일 매출</div><div class="kpi-v" id="b-day">—</div><div class="kpi-s" id="b-day-s">—</div></div>
+        <div class="kpi b2b"><div class="kpi-l">주간 매출 (최근 7일)</div><div class="kpi-v" id="b-day">—</div><div class="kpi-s" id="b-day-s">—</div></div>
         <div class="kpi"><div class="kpi-l">월 누적 (MTD)</div><div class="kpi-v" id="b-mtd">—</div><div class="kpi-s" id="b-mtd-s">—</div></div>
         <div class="kpi"><div class="kpi-l">연 누적 (YTD)</div><div class="kpi-v" id="b-ytd">—</div><div class="kpi-s" id="b-ytd-s">—</div></div>
-        <div class="kpi"><div class="kpi-l">거래 거래처</div><div class="kpi-v" id="b-acc">—</div><div class="kpi-s" id="b-acc-s">—</div></div>
+        <div class="kpi warn"><div class="kpi-l">샘플 공급 (매출제외)</div><div class="kpi-v" id="b-acc">—</div><div class="kpi-s" id="b-acc-s">—</div></div>
       </div>
     </div>
 
-    <div class="alert bad"><span class="ico">🚫</span>
-      <div><b>일간 실적을 낼 수 없습니다 — 시트 구조 문제</b><br>
-      B2B 시트는 <b>거래처 × 월</b> 매트릭스라 주문일자·품목 정보가 없습니다.
-      일간 실적과 제품 TOP3를 켜려면 시트에 <b>주문일자 / 거래처 / 품목 / 수량 / 금액</b> 열을 가진
-      <code>RAW</code> 탭을 추가하고, 현재의 월 매트릭스를 그 탭에서 피벗으로 뽑아내는 구조로 바꿔야 합니다.</div>
+    <div class="alert info"><span class="ico">✅</span>
+      <div><b>B2B 시트가 주문라인 원본으로 개편되어 일자별 집계가 가능해졌습니다.</b>
+      시트 <span class="mono">[①매출입력]</span>의 <b>일자 / 거래처 / 주문구분 / 제품명 / 수량 / 합계금액</b>을 그대로 읽습니다.
+      샘플 공급은 매출에서 분리했습니다.</div>
     </div>
 
     <div class="sec grid g2">
@@ -776,13 +775,20 @@ function renderB2BDaily(){
   const B = b2bByMonth();
   const set=(id,v,s)=>{ const e=document.getElementById(id); if(!e)return; e.innerHTML=v;
     const se=document.getElementById(id+'-s'); if(se&&s!=null) se.innerHTML=s; };
-  const ytd = U.sum(D.b2bAccounts, a=>U.sum(a[1]));
+  const base = D.b2bLastDay;
+  const wk  = D.b2bRange(WEEK.from(LAST_DAY), LAST_DAY);
+  const pw  = D.b2bRange(WEEK.prevFrom(LAST_DAY), WEEK.prevTo(LAST_DAY));
+  const mtd = D.b2bRange(CUR_M+'-01');
+  const y   = D.b2bRange();
+  const dW  = U.delta(wk.rev, pw.rev);
+  const ytd = y.rev;
   const active = D.b2bAccounts.filter(a=>U.sum(a[1])>0);
 
-  set('b-day', '—', '일자별 원천 없음');
-  set('b-mtd', U.krwM(B[CUR_M]||0)+'원', CUR_M);
-  set('b-ytd', U.krwM(ytd)+'원', 'VAT 포함 · 2026 YTD');
-  set('b-acc', active.length+'곳', `등록 ${D.b2bAccounts.length}곳`);
+  set('b-day', wk.rev?U.krwM(wk.rev)+'원':'0원',
+    `${WEEK.from(LAST_DAY)} ~ ${LAST_DAY} · <span class="${dW.cls}">${dW.tx}</span> 전주`);
+  set('b-mtd', U.krwM(mtd.rev)+'원', `${mtd.lines}건 · ${mtd.qty}개`);
+  set('b-ytd', U.krwM(ytd)+'원', `${y.lines}건 · ${y.qty}개 · 최근 거래 ${base}`);
+  set('b-acc', U.krwM(y.sample)+'원', `${y.sampleQty}개 · 매출 인식 제외`);
 
   const months = D.b2bMonths.slice(0,4);
   ck('c-b2b-m', {
@@ -799,8 +805,7 @@ function renderB2BDaily(){
         tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.dataset.label}: ${U.krw(c.parsed.y)}` } } } })
   });
 
-  const top3 = D.b2bAccounts.map(([n,v])=>({n, rev:U.sum(v)})).sort((a,b)=>b.rev-a.rev).slice(0,3).filter(x=>x.rev>0);
-  document.getElementById('b-top3').innerHTML = top3html(top3, v=>U.krwM(v)+'원');
+  document.getElementById('b-top3').innerHTML = top3html(D.b2bAccountsRange().slice(0,3), v=>U.krwM(v)+'원');
 
   document.getElementById('tb-b2b-d').innerHTML =
     `<thead><tr><th>거래처</th>${months.map(m=>`<th>${m.slice(5)}월</th>`).join('')}<th>합계</th></tr></thead><tbody>
