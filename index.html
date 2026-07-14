@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIORÉ 화장품사업본부 통합 대시보드</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  .frame{ width:100%; height:calc(100vh - 190px); min-height:640px; border:1px solid var(--line);
+          border-radius:var(--radius); background:var(--bg-2); }
+  .frame-h{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px; flex-wrap:wrap; }
+  .frame-h h2{ font-size:15px; font-weight:700; }
+  .hero{
+    background:linear-gradient(135deg,#000 0%,#0B0D0E 55%,#0F1516 100%);
+    border:1px solid var(--line); border-radius:18px; padding:26px 28px; margin-bottom:24px;
+    position:relative; overflow:hidden;
+  }
+  .hero::after{ content:''; position:absolute; right:-60px; top:-60px; width:280px; height:280px; border-radius:50%;
+    background:radial-gradient(circle, rgba(46,230,197,.10), transparent 70%); }
+  .hero h2{ font-size:20px; font-weight:750; letter-spacing:-.6px; margin-bottom:7px; }
+  .hero p{ font-size:13px; color:var(--tx-2); line-height:1.7; max-width:760px; }
+  .hero-k{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); margin-top:20px; position:relative; }
+  .hero-k > div{ background:rgba(255,255,255,.025); border:1px solid var(--line); border-radius:11px; padding:13px 15px; }
+  .hero-k .l{ font-size:10px; color:var(--tx-3); text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
+  .hero-k .v{ font-size:19px; font-weight:750; letter-spacing:-.5px; font-variant-numeric:tabular-nums; }
+  .hero-k .s{ font-size:10.5px; color:var(--tx-3); margin-top:4px; }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="logo">
+      <div class="logo-mark">SI</div>
+      <div class="logo-tx">
+        <h1>SIORÉ 화장품사업본부 통합 대시보드</h1>
+        <div class="sub">매출 (유통처별) · 마케팅 · 재고 — 하나의 화면에서</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <span class="pill" id="status"><span class="dot"></span>로딩…</span>
+      <button class="btn" onclick="location.reload()">↻ 새로고침</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-in">
+    <button class="on" data-t="home">🏠 메인</button>
+    <button data-t="sales">💰 매출</button>
+    <button data-t="mkt">📣 마케팅</button>
+    <button data-t="inv">📦 재고</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ===== HOME ===== -->
+<div class="tab on" id="t-home">
+
+  <div class="hero">
+    <h2>화장품사업본부 대시보드 허브</h2>
+    <p>시오레(SIORÉ)의 <b>아마존 US · B2B · 자사몰 · 국내공구</b> 4개 유통처 매출, 메타 광고 성과, 국내·아마존 재고를
+       한 화면에서 추적합니다. 각 카드의 핵심 지표는 구글시트에서 자동 동기화됩니다.</p>
+    <div class="hero-k">
+      <div><div class="l">YTD 통합 매출</div><div class="v" id="h-rev">—</div><div class="s" id="h-rev-s">—</div></div>
+      <div><div class="l">최근 30일 광고 ROAS</div><div class="v" id="h-roas">—</div><div class="s" id="h-roas-s">—</div></div>
+      <div><div class="l">총 재고</div><div class="v" id="h-stock">—</div><div class="s" id="h-stock-s">—</div></div>
+      <div><div class="l">발주 알람</div><div class="v" id="h-alert">—</div><div class="s" id="h-alert-s">—</div></div>
+      <div><div class="l">데이터 기준일</div><div class="v" id="h-date" style="font-size:15px">—</div><div class="s">KST</div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>오늘의 시그널</h2><span class="note">데이터가 말하는 3가지</span></div>
+    <div id="signals" class="grid g3"></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><h2>대시보드</h2></div>
+    <div class="hub">
+
+      <div class="hub-c">
+        <div class="hub-top">
+          <div class="hub-ico">💰</div>
+          <div class="hub-ttl">
+            <h3>매출 대시보드</h3>
+            <p>유통처별 · 일간 / 주간 / 월간</p>
+          </div>
+        </div>
+        <div class="hub-desc">아마존 US·B2B·자사몰·국내공구 4채널 매출을 원화 환산으로 통합. 일자별 추이, 주차 실적, 채널 믹스, 제품별 전환 효율까지.</div>
+        <div class="hub-mini">
+          <div><div class="l">YTD</div><div class="v" id="s-ytd">—</div></div>
+          <div><div class="l">아마존</div><div class="v" id="s-amz">—</div></div>
+          <div><div class="l">자사몰</div><div class="v" id="s-own">—</div></div>
+          <div><div class="l">B2B</div><div class="v" id="s-b2b">—</div></div>
+        </div>
+        <div class="hub-tags">
+          <span class="bdg bdg-mute">일간</span><span class="bdg bdg-mute">주간</span>
+          <span class="bdg bdg-mute">월간</span><span class="bdg bdg-mute">제품별</span>
+        </div>
+        <div class="hub-go">
+          <a href="#" data-go="sales">대시보드 열기 →</a>
+          <a href="sales.html" target="_blank" style="color:var(--tx-3);font-weight:500">새 창 ↗</a>
+        </div>
+      </div>
+
+      <div class="hub-c">
+        <div class="hub-top">
+          <div class="hub-ico">📣</div>
+          <div class="hub-ttl">
+            <h3>마케팅 대시보드</h3>
+            <p>메타(Meta) 광고 성과</p>
+          </div>
+        </div>
+        <div class="hub-desc">광고비·ROAS·CPC·CTR 일별 추적. 지출 구간별 효율 분석과 손익분기 ROAS 시뮬레이터로 예산 증액 의사결정을 지원합니다.</div>
+        <div class="hub-mini">
+          <div><div class="l">총 광고비</div><div class="v" id="m-spend">—</div></div>
+          <div><div class="l">ROAS</div><div class="v" id="m-roas">—</div></div>
+          <div><div class="l">CPA</div><div class="v" id="m-cpa">—</div></div>
+          <div><div class="l">구매</div><div class="v" id="m-buy">—</div></div>
+        </div>
+        <div class="hub-tags">
+          <span class="bdg bdg-mute">ROAS</span><span class="bdg bdg-mute">퍼널</span>
+          <span class="bdg bdg-mute">BEP</span><span class="bdg bdg-mute">지출밴드</span>
+        </div>
+        <div class="hub-go">
+          <a href="#" data-go="mkt">대시보드 열기 →</a>
+          <a href="marketing.html" target="_blank" style="color:var(--tx-3);font-weight:500">새 창 ↗</a>
+        </div>
+      </div>
+
+      <div class="hub-c">
+        <div class="hub-top">
+          <div class="hub-ico">📦</div>
+          <div class="hub-ttl">
+            <h3>재고 대시보드</h3>
+            <p>아워박스 · 아마존 FBA</p>
+          </div>
+        </div>
+        <div class="hub-desc">SKU별 재고·일평균 소진·소진 예상일을 실시간 추적. 리드타임 기준 발주 알람과 유통처별 출고 흐름을 한눈에.</div>
+        <div class="hub-mini">
+          <div><div class="l">국내</div><div class="v" id="i-dom">—</div></div>
+          <div><div class="l">FBA</div><div class="v" id="i-us">—</div></div>
+          <div><div class="l">🚨 즉시</div><div class="v" id="i-urg">—</div></div>
+          <div><div class="l">⚠️ 검토</div><div class="v" id="i-wat">—</div></div>
+        </div>
+        <div class="hub-tags">
+          <span class="bdg bdg-mute">발주알람</span><span class="bdg bdg-mute">소진예측</span>
+          <span class="bdg bdg-mute">출고흐름</span>
+        </div>
+        <div class="hub-go">
+          <a href="#" data-go="inv">대시보드 열기 →</a>
+          <a href="inventory.html" target="_blank" style="color:var(--tx-3);font-weight:500">새 창 ↗</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="sec grid g2">
+    <div class="card">
+      <div class="card-h"><h3>월별 통합 매출 · 채널 믹스</h3><span class="hint">원화 환산</span></div>
+      <div class="chart"><canvas id="c-home"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>데이터 소스 연결 상태</h3><span class="hint">구글시트 5종</span></div>
+      <div class="tbl-wrap"><table id="tb-src" class="src-tbl"></table></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 임베드 탭 ===== -->
+<div class="tab" id="t-sales">
+  <div class="frame-h"><h2>💰 매출 대시보드</h2>
+    <a class="btn" href="sales.html" target="_blank">원본 새 창 ↗</a></div>
+  <iframe class="frame" src="sales.html" title="매출 대시보드"></iframe>
+</div>
+<div class="tab" id="t-mkt">
+  <div class="frame-h"><h2>📣 마케팅 대시보드</h2>
+    <a class="btn" href="marketing.html" target="_blank">원본 새 창 ↗</a></div>
+  <iframe class="frame" src="marketing.html" title="마케팅 대시보드"></iframe>
+</div>
+<div class="tab" id="t-inv">
+  <div class="frame-h"><h2>📦 재고 대시보드</h2>
+    <a class="btn" href="inventory.html" target="_blank">원본 새 창 ↗</a></div>
+  <iframe class="frame" src="inventory.html" title="재고 대시보드"></iframe>
+</div>
+
+</div>
+
+<div class="foot">
+  <b style="color:var(--tx-2)">SIORÉ · 화장품사업본부 통합 대시보드</b><br>
+  데이터 소스: 아마존 일자별 데이터 · 자사몰 월별매출 · B2B 매출요약 · 광고데이터 · 재고/유통/발주관리 (Google Sheets 5종)<br>
+  국내공구(약사) 채널은 매출 원천 확정 후 <code>assets/data.js</code>에 소스만 추가하면 자동 반영됩니다.
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+const MONTHS = ["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"];
+
+/* ---- 집계 ---- */
+const amzM = (()=>{ const m={}; SNAP.amazonDaily.forEach(([d,pv,q,u])=>{ const k=d.slice(0,7);
+  m[k]=m[k]||{pv:0,qty:0,usd:0}; m[k].pv+=pv; m[k].qty+=q; m[k].usd+=u; }); return m; })();
+const ownM = (()=>{ const m={}; SNAP.ownMonthly.forEach(r=> m[r[0]]=r); return m; })();
+const b2bM = (()=>{ const m={}; SNAP.b2bMonths.forEach((mo,i)=> m[mo]=U.sum(SNAP.b2bAccounts,a=>a[1][i])); return m; })();
+
+const mat = MONTHS.map(mo=>({
+  m:mo,
+  amazon:(amzM[mo]?.usd||0)*CONFIG.fxUSDKRW,
+  own:(ownM[mo]?.[3]||0),
+  b2b:(b2bM[mo]||0),
+}));
+const tAmz=U.sum(mat,r=>r.amazon), tOwn=U.sum(mat,r=>r.own), tB2b=U.sum(mat,r=>r.b2b);
+const tAll=tAmz+tOwn+tB2b;
+
+const ads = SNAP.adsDaily.filter(r=>r[1]>0);
+const adT = { spend:U.sum(ads,r=>r[1]), rev:U.sum(ads,r=>r[7]), buy:U.sum(ads,r=>r[6]) };
+adT.roas = adT.rev/adT.spend*100; adT.cpa = adT.spend/adT.buy;
+const ads30 = ads.slice(-30);
+const roas30 = U.sum(ads30,r=>r[7])/U.sum(ads30,r=>r[1])*100;
+
+/* ---- 재고 ---- */
+const DOM_DAYS=101, LT=45, LT_US=60;
+const SHIP_MAP = {
+  "NMN 하이드로 캡슐 클렌징 밀크":"NMN 하이드로 캡슐 클렌징 밀크","NMN 프레쉬 버블 토너":"NMN 프레쉬 버블 토너",
+  "NMN 인텐시브 세럼":"NMN 인텐시브 세럼","NMN 하이드레이팅 수딩 크림":"NMN 하이드레이팅 수딩 크림",
+  "NMN 딥 글로우 리치 크림":"NMN 딥 글로우 리치 크림",
+  "(약국) RRP 박스 + 프레쉬 버블 토너(8EA)":"(약국) RRP + 프레쉬 버블 토너",
+  "(약국) RRP 박스 + 인텐시브 세럼(10EA)":"(약국) RRP + 인텐시브 세럼",
+  "(약국) RRP 박스 + 카밍 수딩 젤(10EA)":"(약국) RRP + 카밍 수딩 젤",
+  "데일리 릴리프 에센스 토너":"데일리 릴리프 에센스 토너","데일리 릴리프 리페어 앰플":"데일리 릴리프 리페어 앰플",
+  "데일리 릴리프 카밍 수딩 젤":"데일리 릴리프 카밍 수딩 젤","데일리 릴리프 컴포트 크림":"데일리 릴리프 컴포트 크림",
+};
+const shipTotal={}; SNAP.shipProductMonth.rows.forEach(([n,v])=> shipTotal[n]=U.sum(v));
+const stock = SNAP.stock.map(([c,n,rg,cat,ob,fba,res,s30])=>{
+  const isUS = rg==='US', st = isUS?fba:ob;
+  const daily = isUS ? (s30||0)/30 : (shipTotal[SHIP_MAP[n]]||0)/DOM_DAYS;
+  return { n, isUS, st, daily, runway: daily>0 ? st/daily : null, lt: isUS?LT_US:LT };
+});
+const urg = stock.filter(s=>s.runway!=null && s.runway<=s.lt);
+const wat = stock.filter(s=>s.runway!=null && s.runway>s.lt && s.runway<=s.lt*2);
+const domStock = U.sum(stock.filter(s=>!s.isUS),s=>s.st);
+const usStock  = U.sum(stock.filter(s=>s.isUS),s=>s.st);
+
+/* ---- 렌더 ---- */
+const g = id => document.getElementById(id);
+g('h-rev').textContent = U.krwM(tAll)+'원';
+g('h-rev-s').textContent = `2026-01 ~ 07 · 3개 채널`;
+g('h-roas').textContent = roas30.toFixed(0)+'%';
+g('h-roas-s').innerHTML = `전체 평균 ${adT.roas.toFixed(0)}% · <span class="${roas30<adT.roas?'dn':'up'}">${roas30<adT.roas?'하락':'상승'}</span>`;
+g('h-stock').textContent = U.num(domStock+usStock);
+g('h-stock-s').textContent = `국내 ${U.num(domStock)} · FBA ${U.num(usStock)}`;
+g('h-alert').innerHTML = `<span style="color:${urg.length?'var(--bad)':'var(--good)'}">${urg.length}</span> <span style="color:var(--tx-3);font-size:14px">/ ${wat.length}</span>`;
+g('h-alert-s').textContent = `즉시 발주 / 검토`;
+g('h-date').textContent = CONFIG.asOf;
+
+g('s-ytd').textContent = U.krwM(tAll);
+g('s-amz').textContent = U.krwM(tAmz);
+g('s-own').textContent = U.krwM(tOwn);
+g('s-b2b').textContent = U.krwM(tB2b);
+
+g('m-spend').textContent = U.usd(adT.spend);
+g('m-roas').textContent  = adT.roas.toFixed(0)+'%';
+g('m-cpa').textContent   = U.usd2(adT.cpa);
+g('m-buy').textContent   = U.num(adT.buy);
+
+g('i-dom').textContent = U.num(domStock);
+g('i-us').textContent  = U.num(usStock);
+g('i-urg').innerHTML   = `<span style="color:${urg.length?'var(--bad)':'var(--good)'}">${urg.length}</span>`;
+g('i-wat').innerHTML   = `<span style="color:${wat.length?'var(--warn)':'var(--good)'}">${wat.length}</span>`;
+
+/* ---- 시그널 ---- */
+const jun = mat.find(r=>r.m==='2026-06'), jul = mat.find(r=>r.m==='2026-07');
+const junT = jun.amazon+jun.own+jun.b2b, julT = jul.amazon+jul.own+jul.b2b;
+const julProj = julT / 11 * 31;
+const staffShare = SNAP.ownTotals.staffShare;
+const seeding = U.sum(SNAP.shipChannelMonth.rows.find(r=>r[0]==='마케팅 시딩')[1]);
+const shipGrand = U.sum(SNAP.shipChannelMonth.rows, r=>U.sum(r[1]));
+
+const signals = [
+  { ico:'📉', tone: julProj < junT ? 'bad':'good',
+    t:'7월 매출, 6월 대비 역성장 전망',
+    d:`6월 통합 ${U.krwM(junT)}원 → 7월 착지 예상 <b>${U.krwM(julProj)}원</b>. 6월은 아마존 6/23~26 프로모션(4일 매출 $27.3k, 전월 전체의 절반)이 만든 스파이크였고, 7월은 그 기저 위에 서 있습니다.`,
+    a:'7월 남은 기간에 아마존 재프로모션 또는 자사몰 세트 프로모션이 없으면 역성장 확정. 이번 주 안에 결정하세요.' },
+  { ico:'💸', tone: roas30 < 200 ? 'bad':'warn',
+    t:'광고 예산은 늘었는데 ROAS는 내려감',
+    d:`최근 30일 ROAS <b>${roas30.toFixed(0)}%</b> (전체 평균 ${adT.roas.toFixed(0)}%). 7/10~11 지출을 $287→$536로 올렸지만 ROAS는 133%→86%로 떨어졌습니다. CPC $2.63, CTR 0.58% — 전형적 <b>소재 피로 + 오디언스 고갈</b> 패턴입니다.`,
+    a:'예산을 올리기 전에 소재 3종 이상 신규 투입 + 타겟 확장. 기여마진 60% 기준 BEP는 167%입니다.' },
+  { ico:'🎁', tone:'warn',
+    t:'매출 없는 물량이 전체의 1/6',
+    d:`마케팅 시딩 출고 <b>${U.num(seeding)}개</b> (전체 국내 출고 ${U.num(shipGrand)}개의 ${(seeding/shipGrand*100).toFixed(0)}%). 여기에 자사몰 임직원 매출 비중 ${staffShare}%까지 더하면, <b>외부 시장에서 실제로 검증된 매출은 생각보다 작습니다.</b>`,
+    a:'시딩별 전용 쿠폰코드를 발급해 전환을 추적하고, 자사몰 KPI는 임직원 제외 기준으로 별도 관리하세요.' },
+];
+g('signals').innerHTML = signals.map(s=>`
+  <div class="card" style="border-left:2.5px solid ${s.tone==='bad'?'var(--bad)':(s.tone==='warn'?'var(--warn)':'var(--good)')}">
+    <div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:9px">
+      <span style="font-size:17px">${s.ico}</span>
+      <h3 style="font-size:13.5px;font-weight:700;line-height:1.4">${s.t}</h3>
+    </div>
+    <div style="font-size:12px;color:var(--tx-2);line-height:1.65;margin-bottom:11px">${s.d}</div>
+    <div style="font-size:11.5px;color:var(--tx);background:var(--bg-2);border:1px solid var(--line);
+                border-radius:8px;padding:9px 11px;line-height:1.55">
+      <b style="color:var(--mint)">▶ 실행</b> ${s.a}
+    </div>
+  </div>`).join('');
+
+/* ---- 차트 ---- */
+new Chart(document.getElementById('c-home'), {
+  type:'bar',
+  data:{ labels:mat.map(r=>r.m.slice(5)+'월'),
+    datasets:[
+      { label:'아마존 US', data:mat.map(r=>r.amazon), backgroundColor:CH.cyan,   borderRadius:5, barPercentage:.68 },
+      { label:'자사몰',    data:mat.map(r=>r.own),    backgroundColor:CH.mint,   borderRadius:5, barPercentage:.68 },
+      { label:'B2B',       data:mat.map(r=>r.b2b),    backgroundColor:CH.purple, borderRadius:5, barPercentage:.68 },
+    ]},
+  options: CH.base({
+    scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#6C777E',font:{size:11}},border:{color:'#2A3035'}},
+      y:{stacked:true,grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+         ticks:{color:'#6C777E',font:{size:10.5},callback:v=>(v/10000).toLocaleString()+'만'}} },
+    plugins:{ ...CH.base().plugins,
+      tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.dataset.label}: ${U.krw(c.parsed.y)}` } } },
+  })
+});
+
+/* ---- 소스 상태 ---- */
+(async()=>{
+  const res = await SIORE.load();
+  SIORE.renderStatus(g('status'));
+  const live = res.mode === 'live';
+  const meta = {
+    amazon:   ['아마존 US 매출', '일자별 · 제품별', 'sales.html'],
+    ownmall:  ['자사몰 (카페24)', '월별 · 제품별', 'sales.html'],
+    b2b:      ['B2B 매출', '거래처 × 월', 'sales.html'],
+    ads:      ['메타 광고', '일자별 RAW', 'marketing.html'],
+    inventory:['재고 · 유통 · 발주', '현재고 · 출고', 'inventory.html'],
+  };
+  g('tb-src').innerHTML =
+    `<thead><tr><th>데이터 소스</th><th>내용</th><th>상태</th><th>시트</th></tr></thead><tbody>
+    ${Object.entries(SOURCES).map(([k,s])=>{
+      const okLive = live && SIORE.raw && SIORE.raw[k];
+      return `<tr><td>${meta[k][0]}</td><td>${meta[k][1]}</td>
+        <td style="text-align:left">${okLive
+          ? '<span class="bdg bdg-good">● 실시간 연동</span>'
+          : '<span class="bdg bdg-warn">◐ 스냅샷 (시트 공개 필요)</span>'}</td>
+        <td style="text-align:left"><a href="https://docs.google.com/spreadsheets/d/${s.id}/edit" target="_blank"
+          style="color:var(--cyan);text-decoration:none;font-size:11px">시트 열기 ↗</a></td></tr>`;
+    }).join('')}
+    <tr><td>국내공구 (약사)</td><td>미정</td>
+      <td style="text-align:left"><span class="bdg bdg-mute">○ 소스 미연결</span></td><td>—</td></tr>
+    </tbody>`;
+})();
+
+/* ---- 탭 ---- */
+const go = t => {
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('on', x.dataset.t===t));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.getElementById('t-'+t).classList.add('on');
+  window.scrollTo({top:0, behavior:'smooth'});
+};
+document.querySelectorAll('.nav button').forEach(b=> b.onclick = ()=> go(b.dataset.t));
+document.querySelectorAll('[data-go]').forEach(a=> a.onclick = e=>{ e.preventDefault(); go(a.dataset.go); });
+</script>
+</body>
+</html>

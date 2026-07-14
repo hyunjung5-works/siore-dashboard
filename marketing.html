@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIORÉ 마케팅 대시보드</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <a href="index.html" class="logo" style="text-decoration:none;color:inherit">
+      <div class="logo-mark">SI</div>
+      <div class="logo-tx">
+        <h1>마케팅 대시보드 <span class="bdg bdg-info">META ADS</span></h1>
+        <div class="sub">SIORÉ · 화장품사업본부 — 광고비 · ROAS · 전환 효율</div>
+      </div>
+    </a>
+    <div class="hdr-right">
+      <span class="pill" id="status"><span class="dot"></span>로딩…</span>
+      <a class="btn" href="index.html">🏠 메인</a>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-in">
+    <button class="on" data-t="ov">📊 개요</button>
+    <button data-t="eff">🎯 광고 효율</button>
+    <button data-t="fun">🔻 퍼널</button>
+    <button data-t="raw">📋 일자별 RAW</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- 개요 -->
+<div class="tab on" id="t-ov">
+  <div class="sec">
+    <div class="sec-h"><h2>광고 성과 요약</h2><span class="note" id="ov-note"></span></div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-l">총 광고비</div><div class="kpi-v" id="k-spend">—</div><div class="kpi-s" id="k-spend-s">—</div></div>
+      <div class="kpi own"><div class="kpi-l">총 구매 전환값</div><div class="kpi-v" id="k-rev">—</div><div class="kpi-s" id="k-rev-s">—</div></div>
+      <div class="kpi amz"><div class="kpi-l">평균 ROAS</div><div class="kpi-v" id="k-roas">—</div><div class="kpi-s" id="k-roas-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">총 구매</div><div class="kpi-v" id="k-buy">—</div><div class="kpi-s" id="k-buy-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">CPA (구매당 비용)</div><div class="kpi-v" id="k-cpa">—</div><div class="kpi-s" id="k-cpa-s">—</div></div>
+    </div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>일별 광고비 · 구매 전환값 · ROAS</h3>
+      <div class="seg" id="seg-ov">
+        <button class="on" data-d="30">최근 30일</button>
+        <button data-d="999">전체</button>
+      </div>
+    </div>
+    <div class="chart tall"><canvas id="c-main"></canvas></div>
+  </div>
+
+  <div class="sec grid g2">
+    <div class="card">
+      <div class="card-h"><h3>주차별 광고비 vs ROAS</h3><span class="hint">예산 증액 시 효율이 유지되는가</span></div>
+      <div class="chart"><canvas id="c-wk"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>월별 요약</h3><span class="hint">6월 · 7월(진행중)</span></div>
+      <div class="tbl-wrap"><table id="tb-mon"></table></div>
+      <div class="alert" id="mon-insight" style="margin:14px 0 0"><span class="ico">💡</span><div>—</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 광고 효율 -->
+<div class="tab" id="t-eff">
+  <div class="sec">
+    <div class="sec-h"><h2>효율 지표 — 지금 무엇이 나빠지고 있는가</h2></div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-l">평균 CPC</div><div class="kpi-v" id="e-cpc">—</div><div class="kpi-s" id="e-cpc-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">평균 CTR</div><div class="kpi-v" id="e-ctr">—</div><div class="kpi-s" id="e-ctr-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">클릭→구매 전환율</div><div class="kpi-v" id="e-cvr">—</div><div class="kpi-s" id="e-cvr-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">CPM (1천노출당)</div><div class="kpi-v" id="e-cpm">—</div><div class="kpi-s" id="e-cpm-s">—</div></div>
+    </div>
+  </div>
+
+  <div class="sec grid g2">
+    <div class="card">
+      <div class="card-h"><h3>CPC · CTR 추이</h3><span class="hint">CPC↑ + CTR↓ = 소재 피로도</span></div>
+      <div class="chart"><canvas id="c-cpc"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>지출 vs ROAS 산점도</h3><span class="hint">고지출 구간의 ROAS 손익분기 확인</span></div>
+      <div class="chart"><canvas id="c-scatter"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>지출 구간별 효율 (Spend Band Analysis)</h3><span class="hint">예산을 얼마까지 올려도 ROAS가 버티는가 — 증액 의사결정용</span></div>
+    <div class="tbl-wrap"><table id="tb-band"></table></div>
+    <div class="alert" id="band-insight" style="margin:14px 0 0"><span class="ico">🎯</span><div>—</div></div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>ROAS 손익분기 시뮬레이터</h3><span class="hint">기여마진율을 입력해 BEP ROAS를 계산합니다</span></div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px">
+      <label style="font-size:11.5px;color:var(--tx-3)">기여마진율 (%)<br>
+        <input id="mgn" type="number" value="60" min="1" max="100"
+          style="margin-top:6px;width:110px;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--mint);font-weight:700;font-family:inherit;font-size:14px">
+      </label>
+      <div class="kpi" style="flex:1;min-width:180px"><div class="kpi-l">손익분기 ROAS</div><div class="kpi-v" id="bep">—</div><div class="kpi-s">이 밑으로 떨어지면 광고 태울수록 손해</div></div>
+      <div class="kpi" id="bep-days-k"><div class="kpi-l">BEP 미달 일수</div><div class="kpi-v" id="bep-days">—</div><div class="kpi-s" id="bep-days-s">—</div></div>
+      <div class="kpi danger"><div class="kpi-l">BEP 미달일 손실 광고비</div><div class="kpi-v" id="bep-loss">—</div><div class="kpi-s">해당일 지출 합계</div></div>
+    </div>
+    <div class="chart"><canvas id="c-bep"></canvas></div>
+  </div>
+</div>
+
+<!-- 퍼널 -->
+<div class="tab" id="t-fun">
+  <div class="sec">
+    <div class="sec-h"><h2>전환 퍼널 · 전체 기간</h2><span class="note">노출 → 클릭 → 구매</span></div>
+  </div>
+  <div class="sec grid g21">
+    <div class="card">
+      <div class="card-h"><h3>퍼널 단계별 볼륨 · 이탈</h3></div>
+      <div class="chart tall"><canvas id="c-funnel"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>단계별 진단</h3></div>
+      <div id="fun-diag" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>주차별 퍼널 효율 변화</h3><span class="hint">CTR(노출→클릭) · CVR(클릭→구매) 동시 추적</span></div>
+    <div class="chart"><canvas id="c-fun-wk"></canvas></div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>광고 → 매출 연결 (아마존 US 대조)</h3><span class="hint">광고 구매전환값과 실제 아마존 매출의 갭 = 오가닉/비귀속 매출</span></div>
+    <div class="chart"><canvas id="c-attr"></canvas></div>
+    <div class="alert info" style="margin:14px 0 0"><span class="ico">🔍</span>
+      <div id="attr-note">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- RAW -->
+<div class="tab" id="t-raw">
+  <div class="sec card">
+    <div class="card-h"><h3>일자별 광고 RAW</h3><span class="hint" id="raw-note">—</span></div>
+    <div class="tbl-wrap" style="max-height:640px;overflow-y:auto"><table id="tb-raw"></table></div>
+  </div>
+</div>
+
+</div>
+
+<div class="foot">
+  <b style="color:var(--tx-2)">데이터 출처</b> · <code>광고데이터 대시보드</code> (2026 메타 광고 월별 데이터_RAW, 단위 $)<br>
+  ROAS = 구매 전환값 ÷ 지출비용. CPA = 지출 ÷ 구매수. 손익분기 ROAS = 1 ÷ 기여마진율.
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+const A = SNAP.adsDaily.filter(r=>r[1]>0);   // 지출 있는 날만
+let charts = {};
+const ck = (id,cfg)=>{ if(charts[id]) charts[id].destroy(); charts[id]=new Chart(document.getElementById(id),cfg); };
+
+const T = {
+  spend: U.sum(A,r=>r[1]), imp: U.sum(A,r=>r[2]), clk: U.sum(A,r=>r[3]),
+  buy:   U.sum(A,r=>r[6]), rev: U.sum(A,r=>r[7]),
+};
+T.roas = T.rev/T.spend*100; T.cpa = T.spend/T.buy; T.cpc = T.spend/T.clk;
+T.ctr = T.clk/T.imp*100;    T.cvr = T.buy/T.clk*100; T.cpm = T.spend/T.imp*1000;
+
+/* ---------- 개요 ---------- */
+function renderOv(){
+  const set=(id,v,s)=>{ document.getElementById(id).textContent=v; document.getElementById(id+'-s').innerHTML=s; };
+  const l7 = A.slice(-7), p7 = A.slice(-14,-7);
+  const r7 = U.sum(l7,r=>r[7])/U.sum(l7,r=>r[1])*100, rp7 = U.sum(p7,r=>r[7])/U.sum(p7,r=>r[1])*100;
+  const dR = U.delta(r7, rp7);
+
+  set('k-spend', U.usd(T.spend), `${A.length}일 · 일평균 ${U.usd(T.spend/A.length)}`);
+  set('k-rev',   U.usd(T.rev),   `광고 귀속 매출 · ${U.krwM(U.toKRW(T.rev))}원`);
+  set('k-roas',  T.roas.toFixed(0)+'%', `최근 7일 <b class="${dR.cls}">${r7.toFixed(0)}%</b> (${dR.tx})`);
+  set('k-buy',   U.num(T.buy), `일평균 ${(T.buy/A.length).toFixed(1)}건`);
+  set('k-cpa',   U.usd2(T.cpa), `클릭당 ${U.usd2(T.cpc)} · CVR ${T.cvr.toFixed(1)}%`);
+  document.getElementById('ov-note').textContent = `${A[0][0]} ~ ${A[A.length-1][0]} · 메타(Meta) 광고`;
+
+  drawMain(30);
+
+  // 주차별
+  const W = wkAgg();
+  ck('c-wk', {
+    data:{ labels:W.map(w=>w.range),
+      datasets:[
+        { type:'bar', label:'광고비', data:W.map(w=>+w.spend.toFixed(0)),
+          backgroundColor:'rgba(167,139,250,.6)', borderRadius:5, barPercentage:.6, yAxisID:'y' },
+        { type:'line', label:'ROAS', data:W.map(w=>+(w.rev/w.spend*100).toFixed(0)),
+          borderColor:CH.mint, borderWidth:2.4, tension:.35, pointRadius:4, pointBackgroundColor:CH.mint, yAxisID:'y1' },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10.5}},border:{color:'#2A3035'}},
+        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}},
+        y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
+           ticks:{color:'#2EE6C5',font:{size:10.5},callback:v=>v+'%'}} } })
+  });
+
+  // 월별
+  const M = monAgg();
+  document.getElementById('tb-mon').innerHTML =
+    `<thead><tr><th>월</th><th>일수</th><th>광고비</th><th>구매</th><th>전환값</th><th>ROAS</th><th>CPA</th></tr></thead><tbody>
+    ${M.map(m=>`<tr><td>${m.k}</td><td>${m.days}</td><td>${U.usd(m.spend)}</td><td>${m.buy}</td>
+      <td>${U.usd(m.rev)}</td><td><b style="color:${m.rev/m.spend>=2?'var(--good)':'var(--warn)'}">${(m.rev/m.spend*100).toFixed(0)}%</b></td>
+      <td>${U.usd2(m.spend/m.buy)}</td></tr>`).join('')}
+    <tr class="total"><td>합계</td><td>${A.length}</td><td>${U.usd(T.spend)}</td><td>${T.buy}</td>
+      <td>${U.usd(T.rev)}</td><td>${T.roas.toFixed(0)}%</td><td>${U.usd2(T.cpa)}</td></tr></tbody>`;
+
+  const jun = M.find(m=>m.k==='2026-06'), jul = M.find(m=>m.k==='2026-07');
+  const jRoas = jun.rev/jun.spend*100, lRoas = jul.rev/jul.spend*100;
+  document.getElementById('mon-insight').querySelector('div').innerHTML =
+    `6월 ROAS <b class="up">${jRoas.toFixed(0)}%</b> → 7월 <b class="${lRoas<jRoas?'dn':'up'}">${lRoas.toFixed(0)}%</b>.
+     6월은 <b>6/23~26 대형 프로모션</b>(4일간 광고비 ${U.usd(U.sum(A.filter(r=>['2026-06-23','2026-06-24','2026-06-25','2026-06-26'].includes(r[0])),r=>r[1]))} · 구매 513건)이 전체를 끌어올린 구조입니다.
+     7월은 지출을 다시 올리고 있으나(7/10~11 급증) ROAS가 <b class="dn">100% 부근</b>까지 내려왔습니다 —
+     <b>같은 소재·같은 타겟으로 예산만 올리는 구간</b>이라는 신호입니다.`;
+}
+
+function drawMain(n){
+  const S = n>=999 ? A : A.slice(-n);
+  ck('c-main', {
+    data:{ labels:S.map(r=>r[0].slice(5)),
+      datasets:[
+        { type:'bar', label:'광고비', data:S.map(r=>r[1]), backgroundColor:'rgba(167,139,250,.55)',
+          borderRadius:3, barPercentage:.85, yAxisID:'y', order:3 },
+        { type:'bar', label:'구매 전환값', data:S.map(r=>r[7]), backgroundColor:'rgba(46,230,197,.5)',
+          borderRadius:3, barPercentage:.85, yAxisID:'y', order:2 },
+        { type:'line', label:'ROAS', data:S.map(r=>r[8]), borderColor:CH.gold, borderWidth:2, tension:.35,
+          pointRadius:0, yAxisID:'y1', order:1 },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
+        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}},
+        y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
+           ticks:{color:'#F6C85F',font:{size:10.5},callback:v=>v+'%'}} } })
+  });
+}
+
+function wkAgg(){
+  const m = new Map();
+  A.forEach(r=>{
+    const k = U.isoWeek(r[0]);
+    if(!m.has(k)) m.set(k,{k, range:U.weekRange(r[0]), spend:0,imp:0,clk:0,buy:0,rev:0,days:0});
+    const o = m.get(k);
+    o.spend+=r[1]; o.imp+=r[2]; o.clk+=r[3]; o.buy+=r[6]; o.rev+=r[7]; o.days++;
+  });
+  return [...m.values()];
+}
+function monAgg(){
+  const m = new Map();
+  A.forEach(r=>{
+    const k = r[0].slice(0,7);
+    if(!m.has(k)) m.set(k,{k,spend:0,imp:0,clk:0,buy:0,rev:0,days:0});
+    const o=m.get(k); o.spend+=r[1]; o.imp+=r[2]; o.clk+=r[3]; o.buy+=r[6]; o.rev+=r[7]; o.days++;
+  });
+  return [...m.values()];
+}
+
+/* ---------- 효율 ---------- */
+function renderEff(){
+  const set=(id,v,s)=>{ document.getElementById(id).textContent=v; document.getElementById(id+'-s').innerHTML=s; };
+  const l7=A.slice(-7), p7=A.slice(-14,-7);
+  const c7 = U.sum(l7,r=>r[1])/U.sum(l7,r=>r[3]), cp7 = U.sum(p7,r=>r[1])/U.sum(p7,r=>r[3]);
+  const t7 = U.sum(l7,r=>r[3])/U.sum(l7,r=>r[2])*100, tp7 = U.sum(p7,r=>r[3])/U.sum(p7,r=>r[2])*100;
+  const v7 = U.sum(l7,r=>r[6])/U.sum(l7,r=>r[3])*100, vp7 = U.sum(p7,r=>r[6])/U.sum(p7,r=>r[3])*100;
+  const m7 = U.sum(l7,r=>r[1])/U.sum(l7,r=>r[2])*1000, mp7 = U.sum(p7,r=>r[1])/U.sum(p7,r=>r[2])*1000;
+  const dc=U.delta(c7,cp7), dt=U.delta(t7,tp7), dv=U.delta(v7,vp7), dm=U.delta(m7,mp7);
+
+  set('e-cpc', U.usd2(T.cpc), `최근7일 <b class="${dc.v>0?'dn':'up'}">${U.usd2(c7)}</b> (${dc.tx})`);
+  set('e-ctr', T.ctr.toFixed(2)+'%', `최근7일 <b class="${dt.v>0?'up':'dn'}">${t7.toFixed(2)}%</b> (${dt.tx})`);
+  set('e-cvr', T.cvr.toFixed(2)+'%', `최근7일 <b class="${dv.v>0?'up':'dn'}">${v7.toFixed(2)}%</b> (${dv.tx})`);
+  set('e-cpm', U.usd2(T.cpm), `최근7일 <b class="${dm.v>0?'dn':'up'}">${U.usd2(m7)}</b> (${dm.tx})`);
+
+  ck('c-cpc', {
+    data:{ labels:A.map(r=>r[0].slice(5)),
+      datasets:[
+        { type:'line', label:'CPC ($)', data:A.map(r=>r[4]), borderColor:CH.red, borderWidth:2, tension:.35, pointRadius:0, yAxisID:'y' },
+        { type:'line', label:'CTR (%)', data:A.map(r=>r[5]), borderColor:CH.mint, borderWidth:2, tension:.35, pointRadius:0, yAxisID:'y1',
+          fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#2EE6C5',.14,0) },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
+        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#FF6B6B',font:{size:10.5},callback:v=>'$'+v.toFixed(1)}},
+        y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
+           ticks:{color:'#2EE6C5',font:{size:10.5},callback:v=>v+'%'}} } })
+  });
+
+  ck('c-scatter', {
+    type:'scatter',
+    data:{ datasets:[{ label:'일별 (지출 vs ROAS)',
+      data:A.map(r=>({x:r[1], y:r[8], d:r[0]})),
+      backgroundColor:A.map(r=> r[8]>=167 ? 'rgba(46,230,197,.75)' : 'rgba(255,107,107,.7)'),
+      pointRadius:5, pointHoverRadius:7 }]},
+    options: CH.base({
+      plugins:{ legend:{display:false},
+        tooltip:{ ...CH.base().plugins.tooltip,
+          callbacks:{ label:c=>` ${c.raw.d} · 지출 ${U.usd2(c.raw.x)} · ROAS ${c.raw.y.toFixed(0)}%` } } },
+      scales:{ x:{ title:{display:true,text:'일 지출 ($)',color:'#6C777E',font:{size:10.5}},
+                   grid:{color:'#21262B'}, border:{display:false}, beginAtZero:true,
+                   ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v} },
+               y:{ title:{display:true,text:'ROAS (%)',color:'#6C777E',font:{size:10.5}},
+                   grid:{color:'#21262B'}, border:{display:false}, beginAtZero:true,
+                   ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'%'} } } })
+  });
+
+  // 지출 밴드
+  const bands = [[0,100],[100,200],[200,400],[400,800],[800,99999]];
+  const bandRows = bands.map(([lo,hi])=>{
+    const s = A.filter(r=>r[1]>=lo && r[1]<hi);
+    if(!s.length) return null;
+    const sp=U.sum(s,r=>r[1]), rv=U.sum(s,r=>r[7]), by=U.sum(s,r=>r[6]), ck_=U.sum(s,r=>r[3]);
+    return { label: hi>9999 ? `$${lo}+` : `$${lo}–${hi}`, n:s.length, sp, rv, by,
+             roas:rv/sp*100, cpa:sp/by, cpc:sp/ck_ };
+  }).filter(Boolean);
+
+  document.getElementById('tb-band').innerHTML =
+    `<thead><tr><th>일 지출 구간</th><th>일수</th><th>총 지출</th><th>총 전환값</th><th>구매</th><th>ROAS</th><th>CPA</th><th>CPC</th></tr></thead><tbody>
+    ${bandRows.map(b=>`<tr><td>${b.label}</td><td>${b.n}</td><td>${U.usd(b.sp)}</td><td>${U.usd(b.rv)}</td>
+      <td>${b.by}</td><td><b style="color:${b.roas>=250?'var(--good)':(b.roas<167?'var(--bad)':'var(--warn)')}">${b.roas.toFixed(0)}%</b></td>
+      <td>${U.usd2(b.cpa)}</td><td>${U.usd2(b.cpc)}</td></tr>`).join('')}
+    </tbody>`;
+
+  const best = [...bandRows].sort((a,b)=>b.roas-a.roas)[0];
+  const worst = [...bandRows].sort((a,b)=>a.roas-b.roas)[0];
+  document.getElementById('band-insight').querySelector('div').innerHTML =
+    `<b>ROAS가 가장 높은 지출 구간은 ${best.label} (ROAS ${best.roas.toFixed(0)}%, CPC ${U.usd2(best.cpc)})</b>,
+     가장 낮은 구간은 ${worst.label} (ROAS ${worst.roas.toFixed(0)}%, CPC ${U.usd2(worst.cpc)}).
+     지출을 올릴수록 CPC가 오르는 구조 — <b>오디언스 풀이 얕다</b>는 뜻입니다.
+     실행: ① 고지출일은 <b>프로모션·신제품 런칭 등 전환값이 확실한 날에만</b> 집중, ②평시에는 ${best.label} 밴드를 기본 예산으로 고정,
+     ③ 예산 증액이 필요하면 <b>소재/타겟을 먼저 늘리고</b> 예산을 따라 올립니다.`;
+
+  drawBEP();
+}
+
+function drawBEP(){
+  const mgn = (+document.getElementById('mgn').value || 60) / 100;
+  const bep = 1/mgn*100;
+  document.getElementById('bep').textContent = bep.toFixed(0)+'%';
+  const under = A.filter(r=>r[8] < bep);
+  const loss = U.sum(under, r=>r[1]);
+  document.getElementById('bep-days').textContent = under.length + '일';
+  document.getElementById('bep-days-s').textContent = `전체 ${A.length}일 중 ${(under.length/A.length*100).toFixed(0)}%`;
+  document.getElementById('bep-loss').textContent = U.usd(loss);
+  document.getElementById('bep-days-k').className = 'kpi ' + (under.length/A.length > .3 ? 'danger' : 'warn');
+
+  ck('c-bep', {
+    type:'bar',
+    data:{ labels:A.map(r=>r[0].slice(5)),
+      datasets:[
+        { label:'일별 ROAS', data:A.map(r=>r[8]), borderRadius:3, barPercentage:.85,
+          backgroundColor:A.map(r=> r[8]>=bep ? 'rgba(46,230,197,.7)':'rgba(255,107,107,.75)') },
+        { type:'line', label:`손익분기 ROAS (${bep.toFixed(0)}%)`, data:A.map(()=>bep),
+          borderColor:CH.gold, borderWidth:2, borderDash:[6,4], pointRadius:0 },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
+        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'%'}} } })
+  });
+}
+
+/* ---------- 퍼널 ---------- */
+function renderFun(){
+  ck('c-funnel', {
+    type:'bar',
+    data:{ labels:['노출','클릭','구매'],
+      datasets:[{ label:'볼륨', data:[T.imp, T.clk, T.buy],
+        backgroundColor:[CH.cyan, CH.mint, CH.gold], borderRadius:6, barPercentage:.55 }] },
+    options: CH.base({ indexAxis:'y',
+      plugins:{ legend:{display:false},
+        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${U.num(c.parsed.x)}` } } },
+      scales:{ x:{ type:'logarithmic', grid:{color:'#21262B'}, border:{display:false},
+                   ticks:{color:'#6C777E',font:{size:10.5},callback:v=>U.num(v)} },
+               y:{ grid:{display:false}, border:{color:'#2A3035'}, ticks:{color:'#A7B1B8',font:{size:12,weight:'600'}} } } })
+  });
+
+  const steps = [
+    { n:'노출 → 클릭 (CTR)', v:T.ctr, unit:'%', bm:'뷰티 카테고리 평균 1.0~1.5%',
+      ok: T.ctr >= 1.5, msg: T.ctr>=1.5 ? '소재 후킹력 양호 — 카테고리 평균 상회' : '소재 피로도 의심 — 크리에이티브 교체 필요' },
+    { n:'클릭 → 구매 (CVR)', v:T.cvr, unit:'%', bm:'이커머스 평균 2~3%',
+      ok: T.cvr >= 3, msg: T.cvr>=3 ? '랜딩·상세페이지 전환력 우수' : '트래픽은 오는데 안 사는 구간 — 상세페이지/리뷰/가격 점검' },
+    { n:'CPA (구매당 비용)', v:T.cpa, unit:'$', bm:'객단가 대비 30% 이하 권장',
+      ok: T.cpa <= (T.rev/T.buy)*0.3,
+      msg: T.cpa <= (T.rev/T.buy)*0.3 ? '획득 비용 건전' : `구매당 ${U.usd2(T.cpa)} 지출 — 객단가 ${U.usd2(T.rev/T.buy)} 대비 ${(T.cpa/(T.rev/T.buy)*100).toFixed(0)}%` },
+    { n:'ROAS', v:T.roas, unit:'%', bm:'기여마진 60% 기준 BEP 167%',
+      ok: T.roas >= 167, msg: T.roas>=167 ? '전체 기간 기준 광고는 흑자 구조' : '광고 태울수록 손해' },
+  ];
+  document.getElementById('fun-diag').innerHTML = steps.map(s=>`
+    <div style="background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:12px;font-weight:700">${s.n}</span>
+        <span style="font-size:16px;font-weight:750;color:${s.ok?'var(--good)':'var(--bad)'};font-variant-numeric:tabular-nums">
+          ${s.unit==='$' ? U.usd2(s.v) : s.v.toFixed(2)+'%'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--tx-3);margin-bottom:6px">벤치마크: ${s.bm}</div>
+      <span class="bdg ${s.ok?'bdg-good':'bdg-bad'}">${s.msg}</span>
+    </div>`).join('');
+
+  const W = wkAgg();
+  ck('c-fun-wk', {
+    data:{ labels:W.map(w=>w.range),
+      datasets:[
+        { type:'line', label:'CTR (노출→클릭)', data:W.map(w=>+(w.clk/w.imp*100).toFixed(2)),
+          borderColor:CH.cyan, borderWidth:2.4, tension:.35, pointRadius:4, pointBackgroundColor:CH.cyan },
+        { type:'line', label:'CVR (클릭→구매)', data:W.map(w=>+(w.buy/w.clk*100).toFixed(2)),
+          borderColor:CH.mint, borderWidth:2.4, tension:.35, pointRadius:4, pointBackgroundColor:CH.mint },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10.5}},border:{color:'#2A3035'}},
+        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'%'}} } })
+  });
+
+  // 광고 vs 아마존 실매출
+  const amzMap = {}; SNAP.amazonDaily.forEach(([d,,,usd])=> amzMap[d]=usd);
+  const days = A.map(r=>r[0]).filter(d=>amzMap[d]!=null);
+  ck('c-attr', {
+    data:{ labels:days.map(d=>d.slice(5)),
+      datasets:[
+        { type:'line', label:'아마존 실매출 (USD)', data:days.map(d=>amzMap[d]),
+          borderColor:CH.cyan, borderWidth:2.2, tension:.35, pointRadius:0,
+          fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#35D6F0',.18,0) },
+        { type:'line', label:'광고 구매전환값 (USD)', data:days.map(d=>{const r=A.find(x=>x[0]===d); return r?r[7]:null;}),
+          borderColor:CH.mint, borderWidth:2.2, tension:.35, pointRadius:0 },
+        { type:'bar', label:'광고비', data:days.map(d=>{const r=A.find(x=>x[0]===d); return r?r[1]:null;}),
+          backgroundColor:'rgba(167,139,250,.35)', borderRadius:3, barPercentage:.8 },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
+        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}} } })
+  });
+
+  const amzSum = U.sum(days, d=>amzMap[d]);
+  const adSum  = U.sum(days, d=>{const r=A.find(x=>x[0]===d); return r?r[7]:0;});
+  const gap = amzSum - adSum;
+  document.getElementById('attr-note').innerHTML =
+    `같은 기간(${days[0]} ~ ${days[days.length-1]}) 아마존 실매출 <b>${U.usd(amzSum)}</b> vs 광고 귀속 전환값 <b>${U.usd(adSum)}</b> →
+     차이 <b class="${gap>=0?'up':'dn'}">${U.usd(Math.abs(gap))}</b>
+     (${gap>=0 ? '광고 비귀속(오가닉·검색·재구매) 매출' : '광고 전환값이 실매출을 초과 — 어트리뷰션 윈도우 중복 가능성'}).
+     광고 귀속률 <b>${(adSum/amzSum*100).toFixed(0)}%</b> — 이 비율이 낮아질수록 브랜드가 광고 의존에서 벗어나고 있다는 뜻입니다.`;
+}
+
+/* ---------- RAW ---------- */
+function renderRaw(){
+  document.getElementById('raw-note').textContent = `${A.length}일 · 최신순`;
+  document.getElementById('tb-raw').innerHTML =
+    `<thead><tr><th>날짜</th><th>지출</th><th>노출</th><th>클릭</th><th>CPC</th><th>CTR</th><th>구매</th><th>전환값</th><th>ROAS</th></tr></thead><tbody>
+    ${[...A].reverse().map(r=>`<tr><td>${r[0]}</td><td>${U.usd2(r[1])}</td><td>${U.num(r[2])}</td><td>${U.num(r[3])}</td>
+      <td>${U.usd2(r[4])}</td><td>${r[5].toFixed(2)}%</td><td>${r[6]}</td><td>${U.usd2(r[7])}</td>
+      <td><b style="color:${r[8]>=250?'var(--good)':(r[8]<167?'var(--bad)':'var(--warn)')}">${r[8].toFixed(0)}%</b></td></tr>`).join('')}
+    </tbody>`;
+}
+
+/* ---------- 부트 ---------- */
+document.querySelectorAll('.nav button').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); document.getElementById('t-'+b.dataset.t).classList.add('on'); };
+});
+document.querySelectorAll('#seg-ov button').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('#seg-ov button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); drawMain(+b.dataset.d); };
+});
+document.getElementById('mgn').oninput = drawBEP;
+
+(async()=>{
+  await SIORE.load();
+  SIORE.renderStatus(document.getElementById('status'));
+  renderOv(); renderEff(); renderFun(); renderRaw();
+})();
+</script>
+</body>
+</html>

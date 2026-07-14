@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIORÉ 재고 대시보드</title>
+<link rel="stylesheet" href="assets/theme.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <a href="index.html" class="logo" style="text-decoration:none;color:inherit">
+      <div class="logo-mark">SI</div>
+      <div class="logo-tx">
+        <h1>재고 대시보드 <span class="bdg bdg-info">아워박스 · 아마존 FBA</span></h1>
+        <div class="sub">SIORÉ · 화장품사업본부 — 재고 · 소진 예측 · 발주 알람</div>
+      </div>
+    </a>
+    <div class="hdr-right">
+      <label class="pill" style="gap:5px">
+        발주 리드타임
+        <input id="lt" type="number" value="45" step="5"
+          style="width:44px;background:transparent;border:none;color:var(--mint);font-weight:700;font-family:inherit;font-size:11px;text-align:right">
+        일
+      </label>
+      <span class="pill" id="status"><span class="dot"></span>로딩…</span>
+      <a class="btn" href="index.html">🏠 메인</a>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-in">
+    <button class="on" data-t="al">🚨 발주 알람</button>
+    <button data-t="dom">🇰🇷 국내 (아워박스)</button>
+    <button data-t="us">🇺🇸 아마존 FBA</button>
+    <button data-t="flow">📦 출고 흐름</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- 발주 알람 -->
+<div class="tab on" id="t-al">
+  <div class="sec">
+    <div class="sec-h"><h2>발주 알람 · 전체 SKU</h2><span class="note" id="al-note"></span></div>
+    <div class="kpis">
+      <div class="kpi danger"><div class="kpi-l">🚨 즉시 발주</div><div class="kpi-v" id="k-urg">—</div><div class="kpi-s" id="k-urg-s">—</div></div>
+      <div class="kpi warn"><div class="kpi-l">⚠️ 발주 검토</div><div class="kpi-v" id="k-wat">—</div><div class="kpi-s" id="k-wat-s">—</div></div>
+      <div class="kpi own"><div class="kpi-l">✅ 안전</div><div class="kpi-v" id="k-ok">—</div><div class="kpi-s" id="k-ok-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">총 재고</div><div class="kpi-v" id="k-tot">—</div><div class="kpi-s" id="k-tot-s">—</div></div>
+    </div>
+  </div>
+
+  <div id="al-list" class="sec"></div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>전체 SKU 소진 예상일</h3>
+      <span class="hint">소진예상일 = 가용재고 ÷ 일평균 소진량 · 리드타임 <b id="lt-echo">45</b>일 기준</span>
+    </div>
+    <div class="tbl-wrap"><table id="tb-al"></table></div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>소진 예상일 분포</h3><span class="hint">짧을수록 위험 · 빨간선 = 리드타임</span></div>
+    <div class="chart tall"><canvas id="c-runway"></canvas></div>
+  </div>
+</div>
+
+<!-- 국내 -->
+<div class="tab" id="t-dom">
+  <div class="sec">
+    <div class="sec-h"><h2>국내 재고 (아워박스)</h2><span class="note" id="dom-note"></span></div>
+    <div class="kpis">
+      <div class="kpi own"><div class="kpi-l">국내 총 가용재고</div><div class="kpi-v" id="d-tot">—</div><div class="kpi-s" id="d-tot-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">일평균 출고</div><div class="kpi-v" id="d-avg">—</div><div class="kpi-s" id="d-avg-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">전체 소진 예상</div><div class="kpi-v" id="d-run">—</div><div class="kpi-s" id="d-run-s">—</div></div>
+      <div class="kpi warn"><div class="kpi-l">주의 SKU</div><div class="kpi-v" id="d-risk">—</div><div class="kpi-s" id="d-risk-s">—</div></div>
+    </div>
+  </div>
+
+  <div class="sec grid g21">
+    <div class="card">
+      <div class="card-h"><h3>SKU별 재고 vs 소진 예상일</h3><span class="hint">막대=재고, 선=소진예상일</span></div>
+      <div class="chart tall"><canvas id="c-dom"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>카테고리별 재고 구성</h3></div>
+      <div class="chart tall"><canvas id="c-domcat"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>국내 SKU 상세</h3><span class="hint">RRP 박스는 입수량(8·10개입) 환산 표시</span></div>
+    <div class="tbl-wrap"><table id="tb-dom"></table></div>
+  </div>
+</div>
+
+<!-- 아마존 -->
+<div class="tab" id="t-us">
+  <div class="sec">
+    <div class="sec-h"><h2>아마존 FBA 재고</h2><span class="note" id="us-note"></span></div>
+    <div class="kpis">
+      <div class="kpi amz"><div class="kpi-l">FBA 가용재고</div><div class="kpi-v" id="u-tot">—</div><div class="kpi-s" id="u-tot-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">예약중 (Reserved)</div><div class="kpi-v" id="u-res">—</div><div class="kpi-s" id="u-res-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">최근 30일 판매</div><div class="kpi-v" id="u-sold">—</div><div class="kpi-s" id="u-sold-s">—</div></div>
+      <div class="kpi danger"><div class="kpi-l">품절 위험 SKU</div><div class="kpi-v" id="u-risk">—</div><div class="kpi-s" id="u-risk-s">—</div></div>
+    </div>
+  </div>
+
+  <div class="alert warn"><span class="ico">⚠️</span>
+    <div><b>아마존은 리드타임이 국내보다 훨씬 깁니다</b> — 한국 출고 → 선적 → FBA 입고까지 통상 45~60일.
+    아래 소진예상일이 <b>60일 미만</b>인 SKU는 지금 발주해도 품절 구간이 생깁니다.</div>
+  </div>
+
+  <div class="sec grid g21">
+    <div class="card">
+      <div class="card-h"><h3>FBA SKU별 재고 · 30일 판매</h3></div>
+      <div class="chart tall"><canvas id="c-us"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>판매 속도 대비 재고 여유</h3><span class="hint">소진 예상일 (일)</span></div>
+      <div class="chart tall"><canvas id="c-usrun"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>FBA SKU 상세</h3><span class="hint">아마존 재고 기준일 2026-07-12</span></div>
+    <div class="tbl-wrap"><table id="tb-us"></table></div>
+  </div>
+</div>
+
+<!-- 출고 흐름 -->
+<div class="tab" id="t-flow">
+  <div class="sec">
+    <div class="sec-h"><h2>국내 출고 흐름 (2026.4~7월)</h2><span class="note">* 7월은 7/10까지</span></div>
+  </div>
+
+  <div class="sec grid g21">
+    <div class="card">
+      <div class="card-h"><h3>유통처별 월간 출고량</h3><span class="hint">수량 기준 (박스/개)</span></div>
+      <div class="chart tall"><canvas id="c-flow"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>유통처 비중</h3><span class="hint">4~7월 누적</span></div>
+      <div class="chart tall"><canvas id="c-flowmix"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>유통처 × 월 출고표</h3></div>
+    <div class="tbl-wrap"><table id="tb-flow"></table></div>
+    <div class="alert info" style="margin:14px 0 0"><span class="ico">💡</span>
+      <div id="flow-insight">—</div>
+    </div>
+  </div>
+
+  <div class="sec card">
+    <div class="card-h"><h3>제품 × 월 출고 (국내)</h3><span class="hint">발주 시점 판단을 위한 소진 추세</span></div>
+    <div class="tbl-wrap"><table id="tb-flowp"></table></div>
+  </div>
+</div>
+
+</div>
+
+<div class="foot">
+  <b style="color:var(--tx-2)">데이터 출처</b> · <code>시오레_재고_유통_발주관리</code> (1.현재고현황 / 2.유통처별출고_월별 / 2-2.제품월별_유통처별)<br>
+  국내 일평균 소진 = 2026-04-01 ~ 07-10 (101일) 출고량 ÷ 101 · 아마존 일평균 = 최근 30일 판매 ÷ 30<br>
+  ※ 추후 <b>아워박스 API / 아마존 SP-API</b> 연결 시 이 대시보드가 자동 갱신되도록 설계되어 있습니다 (<code>SOURCES</code> 교체만).
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+let charts={};
+const ck=(id,cfg)=>{ if(charts[id]) charts[id].destroy(); charts[id]=new Chart(document.getElementById(id),cfg); };
+
+const DOM_DAYS = 101;   // 2026-04-01 ~ 07-10
+const SHIP_MAP = {
+  "NMN 하이드로 캡슐 클렌징 밀크":"NMN 하이드로 캡슐 클렌징 밀크",
+  "NMN 프레쉬 버블 토너":"NMN 프레쉬 버블 토너",
+  "NMN 인텐시브 세럼":"NMN 인텐시브 세럼",
+  "NMN 하이드레이팅 수딩 크림":"NMN 하이드레이팅 수딩 크림",
+  "NMN 딥 글로우 리치 크림":"NMN 딥 글로우 리치 크림",
+  "(약국) RRP 박스 + 프레쉬 버블 토너(8EA)":"(약국) RRP + 프레쉬 버블 토너",
+  "(약국) RRP 박스 + 인텐시브 세럼(10EA)":"(약국) RRP + 인텐시브 세럼",
+  "(약국) RRP 박스 + 카밍 수딩 젤(10EA)":"(약국) RRP + 카밍 수딩 젤",
+  "데일리 릴리프 에센스 토너":"데일리 릴리프 에센스 토너",
+  "데일리 릴리프 리페어 앰플":"데일리 릴리프 리페어 앰플",
+  "데일리 릴리프 카밍 수딩 젤":"데일리 릴리프 카밍 수딩 젤",
+  "데일리 릴리프 컴포트 크림":"데일리 릴리프 컴포트 크림",
+};
+const shipTotal = {};
+SNAP.shipProductMonth.rows.forEach(([n,v])=> shipTotal[n] = U.sum(v));
+
+/** 전체 SKU 분석 모델 */
+function build(){
+  return SNAP.stock.map(([code,name,region,cat,ob,fba,res,sold30])=>{
+    const isUS = region==='US';
+    const stock = isUS ? fba : ob;
+    let daily = 0, basis = '';
+    if(isUS){
+      daily = (sold30||0)/30;
+      basis = `최근30일 ${sold30||0}개 ÷ 30`;
+    } else {
+      const sk = SHIP_MAP[name];
+      const out = shipTotal[sk] || 0;
+      daily = out / DOM_DAYS;
+      basis = `4~7월 출고 ${out}개 ÷ ${DOM_DAYS}일`;
+    }
+    const runway = daily > 0 ? stock/daily : null;
+    return { code, name, region, cat, stock, reserved: isUS?res:0, sold30, daily, basis, runway, isUS };
+  });
+}
+const M = build();
+
+function tier(runway, lt){
+  if(runway == null) return {k:'none', bdg:'<span class="bdg bdg-mute">소진 없음</span>', rank:3};
+  if(runway <= lt)     return {k:'urgent', bdg:'<span class="bdg bdg-bad">🚨 즉시 발주</span>', rank:0};
+  if(runway <= lt*2)   return {k:'watch',  bdg:'<span class="bdg bdg-warn">⚠️ 발주 검토</span>', rank:1};
+  return {k:'ok', bdg:'<span class="bdg bdg-good">✅ 안전</span>', rank:2};
+}
+
+function render(){
+  const lt = +document.getElementById('lt').value || 45;
+  document.getElementById('lt-echo').textContent = lt;
+
+  const rows = M.map(m=>({ ...m, t: tier(m.runway, m.isUS ? Math.max(lt,60) : lt) }));
+  const urg = rows.filter(r=>r.t.k==='urgent'), wat = rows.filter(r=>r.t.k==='watch');
+  const ok  = rows.filter(r=>r.t.k==='ok'),     non = rows.filter(r=>r.t.k==='none');
+
+  const set=(id,v,s)=>{ document.getElementById(id).textContent=v; document.getElementById(id+'-s').innerHTML=s; };
+  set('k-urg', urg.length+'개', urg.length? urg.slice(0,2).map(r=>r.name).join(', ')+(urg.length>2?' 외':'') : '해당 없음');
+  set('k-wat', wat.length+'개', `리드타임 ${lt}일 × 2 이내 소진`);
+  set('k-ok',  ok.length+'개',  `총 ${rows.length}개 SKU 중`);
+  set('k-tot', U.num(U.sum(M,m=>m.stock)), `국내 ${U.num(U.sum(M.filter(m=>!m.isUS),m=>m.stock))} · FBA ${U.num(U.sum(M.filter(m=>m.isUS),m=>m.stock))}`);
+  document.getElementById('al-note').textContent =
+    `아워박스 ${SNAP.stockAsOf.ourbox} · 아마존 ${SNAP.stockAsOf.amazon} 기준 · 국내 리드타임 ${lt}일 / 아마존 ${Math.max(lt,60)}일 적용`;
+
+  // 알람 리스트
+  const box = document.getElementById('al-list');
+  const card = (title, list, cls, ico, msg) => !list.length ? '' : `
+    <div class="alert ${cls}" style="align-items:flex-start">
+      <span class="ico">${ico}</span>
+      <div style="flex:1">
+        <b>${title} — ${list.length}개 SKU</b><br>
+        <span style="color:var(--tx-3);font-size:11.5px">${msg}</span>
+        <div style="margin-top:10px;display:grid;gap:7px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        ${list.sort((a,b)=>a.runway-b.runway).map(r=>`
+          <div style="background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;display:flex;justify-content:space-between;gap:8px;align-items:center">
+            <div style="min-width:0">
+              <div style="font-size:12px;font-weight:650;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name}</div>
+              <div style="font-size:10.5px;color:var(--tx-3)">재고 ${U.num(r.stock)} · 일평균 ${r.daily.toFixed(1)}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:16px;font-weight:750;color:${r.t.k==='urgent'?'var(--bad)':'var(--warn)'};font-variant-numeric:tabular-nums">${Math.round(r.runway)}일</div>
+              <div style="font-size:10px;color:var(--tx-3)">소진 예상</div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  box.innerHTML =
+    card('🚨 즉시 발주 필요', urg, 'bad', '🚨', `리드타임 내 품절이 확정됩니다. 오늘 발주해도 입고 전에 재고가 바닥납니다.`) +
+    card('⚠️ 발주 검토', wat, 'warn', '⚠️', `다음 발주 사이클에 반드시 포함하세요.`) +
+    (urg.length===0 && wat.length===0 ? `<div class="alert info"><span class="ico">✅</span><div><b>현재 리드타임 기준 발주 위험 SKU 없음.</b> 다만 프로모션 계획이 있으면 소진 속도가 급변합니다 — 아마존 6/23~26 프로모션 때 세럼 판매가 평시의 10배까지 뛰었습니다.</div></div>` : '');
+
+  // 전체 표
+  document.getElementById('tb-al').innerHTML =
+    `<thead><tr><th>품목명</th><th>지역</th><th>카테고리</th><th>가용재고</th><th>일평균 소진</th><th>소진 예상</th><th>산출 근거</th><th>상태</th></tr></thead><tbody>
+    ${[...rows].sort((a,b)=> a.t.rank-b.t.rank || (a.runway??1e9)-(b.runway??1e9)).map(r=>`
+      <tr><td>${r.name}</td>
+      <td>${r.isUS?'🇺🇸 US':'🇰🇷 국내'}</td><td>${r.cat}</td>
+      <td>${U.num(r.stock)}</td><td>${r.daily?r.daily.toFixed(2):'—'}</td>
+      <td><b style="color:${r.t.k==='urgent'?'var(--bad)':(r.t.k==='watch'?'var(--warn)':'var(--tx-2)')}">${r.runway?Math.round(r.runway)+'일':'—'}</b></td>
+      <td style="text-align:left;color:var(--tx-3);font-size:11px">${r.basis}</td>
+      <td style="text-align:left">${r.t.bdg}</td></tr>`).join('')}
+    </tbody>`;
+
+  // runway 차트
+  const rw = rows.filter(r=>r.runway!=null).sort((a,b)=>a.runway-b.runway);
+  ck('c-runway', {
+    type:'bar',
+    data:{ labels:rw.map(r=>(r.isUS?'🇺🇸 ':'')+r.name),
+      datasets:[
+        { label:'소진 예상일', data:rw.map(r=>Math.round(r.runway)),
+          backgroundColor:rw.map(r=> r.t.k==='urgent'?'rgba(255,107,107,.85)':(r.t.k==='watch'?'rgba(246,200,95,.85)':'rgba(46,230,197,.7)')),
+          borderRadius:4, barPercentage:.72 },
+      ]},
+    options: CH.base({ indexAxis:'y',
+      plugins:{ legend:{display:false},
+        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` 소진 예상 ${c.parsed.x}일` } },
+      },
+      scales:{ x:{ type:'logarithmic', grid:{color:'#21262B'}, border:{display:false},
+                   ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'일'} },
+               y:{ grid:{display:false}, border:{color:'#2A3035'}, ticks:{color:'#A7B1B8',font:{size:10}} } } })
+  });
+
+  renderDom(lt); renderUS(lt);
+}
+
+/* ---------- 국내 ---------- */
+function renderDom(lt){
+  const D = M.filter(m=>!m.isUS);
+  const tot = U.sum(D,m=>m.stock), avg = U.sum(D,m=>m.daily);
+  const risk = D.filter(m=>m.runway!=null && m.runway<=lt*2);
+  const set=(id,v,s)=>{ document.getElementById(id).textContent=v; document.getElementById(id+'-s').innerHTML=s; };
+  set('d-tot', U.num(tot), `${D.length}개 SKU`);
+  set('d-avg', avg.toFixed(1)+'개', `4~7월 총 출고 ${U.num(U.sum(Object.values(shipTotal)))}개 ÷ ${DOM_DAYS}일`);
+  set('d-run', avg? Math.round(tot/avg)+'일':'—', `현 출고 속도 유지 기준`);
+  set('d-risk', risk.length+'개', risk.length? risk.map(r=>r.name.replace(/\(약국\) RRP 박스 \+ /,'RRP ')).join(', ') : '해당 없음');
+  document.getElementById('dom-note').textContent = `아워박스 ${SNAP.stockAsOf.ourbox} 기준`;
+
+  const S = [...D].sort((a,b)=>b.stock-a.stock);
+  ck('c-dom', {
+    data:{ labels:S.map(m=>m.name.replace(/\(약국\) RRP 박스 \+ /,'RRP ')),
+      datasets:[
+        { type:'bar', label:'가용재고', data:S.map(m=>m.stock), backgroundColor:CH.mint, borderRadius:4, barPercentage:.65, yAxisID:'y' },
+        { type:'line', label:'소진 예상일', data:S.map(m=>m.runway?Math.round(m.runway):null),
+          borderColor:CH.gold, borderWidth:2, tension:.3, pointRadius:4, pointBackgroundColor:CH.gold, yAxisID:'y1' },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:9.5},maxRotation:45,minRotation:45},border:{color:'#2A3035'}},
+        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#6C777E',font:{size:10.5}}},
+        y1:{position:'right',type:'logarithmic',grid:{display:false},border:{display:false},
+           ticks:{color:'#F6C85F',font:{size:10.5},callback:v=>v+'일'}} } })
+  });
+
+  const cats = {};
+  D.forEach(m=> cats[m.cat] = (cats[m.cat]||0) + m.stock);
+  ck('c-domcat', {
+    type:'doughnut',
+    data:{ labels:Object.keys(cats), datasets:[{ data:Object.values(cats),
+      backgroundColor:CH.palette, borderColor:'#16191C', borderWidth:3, hoverOffset:8 }] },
+    options: CH.base({ cutout:'62%', scales:{},
+      plugins:{ legend:{position:'bottom',labels:{color:'#A7B1B8',usePointStyle:true,pointStyle:'circle',boxWidth:9,font:{size:11.5,weight:'600'},padding:12}},
+        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.label}: ${U.num(c.parsed)}개 (${(c.parsed/U.sum(Object.values(cats))*100).toFixed(1)}%)` } } } })
+  });
+
+  const rrp = SNAP.shipProductMonth.rrpUnitsPerBox;
+  document.getElementById('tb-dom').innerHTML =
+    `<thead><tr><th>품목명</th><th>카테고리</th><th>가용재고</th><th>4~7월 출고</th><th>일평균</th><th>소진 예상</th><th>환산 단품</th><th>상태</th></tr></thead><tbody>
+    ${[...D].sort((a,b)=>(a.runway??1e9)-(b.runway??1e9)).map(m=>{
+      const sk = SHIP_MAP[m.name];
+      const per = Object.entries(rrp).find(([k])=>k===sk)?.[1];
+      const t = tier(m.runway, lt);
+      return `<tr><td>${m.name}</td><td>${m.cat}</td><td>${U.num(m.stock)}</td>
+        <td>${U.num(shipTotal[sk]||0)}</td><td>${m.daily.toFixed(2)}</td>
+        <td><b style="color:${t.k==='urgent'?'var(--bad)':(t.k==='watch'?'var(--warn)':'var(--tx-2)')}">${m.runway?Math.round(m.runway)+'일':'—'}</b></td>
+        <td>${per? U.num(m.stock*per)+'개 ('+per+'입)' : '—'}</td>
+        <td style="text-align:left">${t.bdg}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계</td><td></td><td>${U.num(U.sum(D,m=>m.stock))}</td>
+      <td>${U.num(U.sum(Object.values(shipTotal)))}</td><td>${U.sum(D,m=>m.daily).toFixed(2)}</td>
+      <td colspan="3"></td></tr></tbody>`;
+}
+
+/* ---------- 아마존 ---------- */
+function renderUS(lt){
+  const US = M.filter(m=>m.isUS);
+  const ltUS = Math.max(lt, 60);
+  const set=(id,v,s)=>{ document.getElementById(id).textContent=v; document.getElementById(id+'-s').innerHTML=s; };
+  const risk = US.filter(m=>m.runway!=null && m.runway<=ltUS);
+  set('u-tot', U.num(U.sum(US,m=>m.stock)), `${US.length}개 SKU`);
+  set('u-res', U.num(U.sum(US,m=>m.reserved)), '주문 처리 중 · 가용재고에서 제외됨');
+  set('u-sold',U.num(U.sum(US,m=>m.sold30||0)), `일평균 ${(U.sum(US,m=>m.sold30||0)/30).toFixed(1)}개`);
+  set('u-risk', risk.length+'개', risk.length? risk.map(r=>r.name.replace('[US] ','')).join(', ') : `리드타임 ${ltUS}일 내 품절 없음`);
+  document.getElementById('us-note').textContent = `아마존 ${SNAP.stockAsOf.amazon} 기준 · 리드타임 ${ltUS}일 적용`;
+
+  const S=[...US].sort((a,b)=>b.stock-a.stock);
+  ck('c-us', {
+    type:'bar',
+    data:{ labels:S.map(m=>m.name.replace('[US] ','')),
+      datasets:[
+        { label:'FBA 가용재고', data:S.map(m=>m.stock), backgroundColor:CH.cyan, borderRadius:4, barPercentage:.7, stack:'a' },
+        { label:'예약중', data:S.map(m=>m.reserved), backgroundColor:'rgba(53,214,240,.3)', borderRadius:4, barPercentage:.7, stack:'a' },
+        { label:'최근 30일 판매', data:S.map(m=>m.sold30||0), backgroundColor:CH.gold, borderRadius:4, barPercentage:.7, stack:'b' },
+      ]},
+    options: CH.base({
+      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#6C777E',font:{size:9.5},maxRotation:40,minRotation:40},border:{color:'#2A3035'}},
+        y:{stacked:true,grid:{color:'#21262B'},border:{display:false},beginAtZero:true,ticks:{color:'#6C777E',font:{size:10.5}}} } })
+  });
+
+  const R = US.filter(m=>m.runway!=null).sort((a,b)=>a.runway-b.runway);
+  ck('c-usrun', {
+    type:'bar',
+    data:{ labels:R.map(m=>m.name.replace('[US] ','')),
+      datasets:[{ label:'소진 예상일', data:R.map(m=>Math.round(m.runway)),
+        backgroundColor:R.map(m=> m.runway<=ltUS?'rgba(255,107,107,.85)':(m.runway<=ltUS*2?'rgba(246,200,95,.85)':'rgba(46,230,197,.7)')),
+        borderRadius:4, barPercentage:.7 }] },
+    options: CH.base({ indexAxis:'y', plugins:{legend:{display:false},tooltip:{...CH.base().plugins.tooltip,
+        callbacks:{label:c=>` ${c.parsed.x}일`}}},
+      scales:{ x:{type:'logarithmic',grid:{color:'#21262B'},border:{display:false},
+                  ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'일'}},
+               y:{grid:{display:false},border:{color:'#2A3035'},ticks:{color:'#A7B1B8',font:{size:10.5}}} } })
+  });
+
+  document.getElementById('tb-us').innerHTML =
+    `<thead><tr><th>품목명</th><th>카테고리</th><th>FBA 가용</th><th>예약중</th><th>30일 판매</th><th>일평균</th><th>소진 예상</th><th>상태</th></tr></thead><tbody>
+    ${[...US].sort((a,b)=>(a.runway??1e9)-(b.runway??1e9)).map(m=>{
+      const t = tier(m.runway, ltUS);
+      return `<tr><td>${m.name.replace('[US] ','')}</td><td>${m.cat}</td>
+        <td>${U.num(m.stock)}</td><td>${U.num(m.reserved)}</td><td>${U.num(m.sold30||0)}</td>
+        <td>${m.daily?m.daily.toFixed(2):'0'}</td>
+        <td><b style="color:${t.k==='urgent'?'var(--bad)':(t.k==='watch'?'var(--warn)':'var(--tx-2)')}">${m.runway?Math.round(m.runway)+'일':'판매 없음'}</b></td>
+        <td style="text-align:left">${t.bdg}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계</td><td></td><td>${U.num(U.sum(US,m=>m.stock))}</td><td>${U.num(U.sum(US,m=>m.reserved))}</td>
+      <td>${U.num(U.sum(US,m=>m.sold30||0))}</td><td colspan="3"></td></tr></tbody>`;
+}
+
+/* ---------- 출고 흐름 ---------- */
+function renderFlow(){
+  const F = SNAP.shipChannelMonth;
+  ck('c-flow', {
+    type:'bar',
+    data:{ labels:F.months,
+      datasets: F.rows.map((r,i)=>({ label:r[0], data:r[1],
+        backgroundColor: CH.palette[i%CH.palette.length], borderRadius:4, barPercentage:.72 })) },
+    options: CH.base({
+      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#6C777E',font:{size:11.5}},border:{color:'#2A3035'}},
+        y:{stacked:true,grid:{color:'#21262B'},border:{display:false},beginAtZero:true,ticks:{color:'#6C777E',font:{size:10.5}}} } })
+  });
+
+  const tot = F.rows.map(r=>[r[0], U.sum(r[1])]).sort((a,b)=>b[1]-a[1]);
+  const grand = U.sum(tot,r=>r[1]);
+  ck('c-flowmix', {
+    type:'doughnut',
+    data:{ labels:tot.map(r=>r[0]), datasets:[{ data:tot.map(r=>r[1]),
+      backgroundColor:CH.palette, borderColor:'#16191C', borderWidth:3, hoverOffset:8 }] },
+    options: CH.base({ cutout:'60%', scales:{},
+      plugins:{ legend:{position:'bottom',labels:{color:'#A7B1B8',usePointStyle:true,pointStyle:'circle',boxWidth:8,font:{size:10.5,weight:'600'},padding:9}},
+        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.label}: ${U.num(c.parsed)}개 (${(c.parsed/grand*100).toFixed(1)}%)` } } } })
+  });
+
+  document.getElementById('tb-flow').innerHTML =
+    `<thead><tr><th>유통처</th>${F.months.map(m=>`<th>${m}</th>`).join('')}<th>합계</th><th>비중</th></tr></thead><tbody>
+    ${[...F.rows].sort((a,b)=>U.sum(b[1])-U.sum(a[1])).map(([n,v])=>{
+      const t = U.sum(v);
+      return `<tr><td>${n}</td>${v.map(x=>`<td>${x?U.num(x):'—'}</td>`).join('')}
+        <td><b style="color:var(--tx)">${U.num(t)}</b></td><td>${(t/grand*100).toFixed(1)}%</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계</td>${F.months.map((m,i)=>`<td>${U.num(U.sum(F.rows,r=>r[1][i]))}</td>`).join('')}
+      <td>${U.num(grand)}</td><td>100%</td></tr></tbody>`;
+
+  const top = tot[0], seeding = F.rows.find(r=>r[0]==='마케팅 시딩');
+  const seedTot = U.sum(seeding[1]);
+  document.getElementById('flow-insight').innerHTML =
+    `<b>출고량 1위는 ${top[0]} (${U.num(top[1])}개 · ${(top[1]/grand*100).toFixed(0)}%)</b> — 자사약국 채널이 국내 물량의 절반 가까이를 흡수하고 있습니다.
+     반면 <b>마케팅 시딩이 ${U.num(seedTot)}개(${(seedTot/grand*100).toFixed(0)}%)</b>로 2~3위권 — 매출 없는 무상 출고가 전체 물량의 1/6입니다.
+     <b>시딩 ROI를 측정하지 않으면 재고만 녹습니다.</b> 실행: 시딩 대상별로 <b>코드가 다른 쿠폰/링크</b>를 붙여 시딩 → 자사몰 전환을 최소한으로라도 추적하세요.
+     또한 B2B는 6월 738개로 급증했는데 매출은 ₩3.17M(그리니스트 1곳) — <b>출고 대비 매출 인식이 지연</b>되고 있는지 확인이 필요합니다.`;
+
+  const P = SNAP.shipProductMonth;
+  document.getElementById('tb-flowp').innerHTML =
+    `<thead><tr><th>품목명</th>${P.months.map(m=>`<th>${m}</th>`).join('')}<th>합계</th><th>추세</th></tr></thead><tbody>
+    ${[...P.rows].sort((a,b)=>U.sum(b[1])-U.sum(a[1])).map(([n,v])=>{
+      const t = U.sum(v);
+      const jun = v[2], jul = v[3]*3;   // 7월 10일치 → 월 환산
+      const tr = jun ? (jul-jun)/jun*100 : null;
+      const cls = tr==null?'flat':(tr>10?'up':(tr<-10?'dn':'flat'));
+      return `<tr><td>${n}</td>${v.map(x=>`<td>${x?U.num(x):'—'}</td>`).join('')}
+        <td><b style="color:var(--tx)">${U.num(t)}</b></td>
+        <td class="${cls}">${tr==null?'—':(tr>0?'▲ ':'▼ ')+Math.abs(tr).toFixed(0)+'%'}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계</td>${P.months.map((m,i)=>`<td>${U.num(U.sum(P.rows,r=>r[1][i]))}</td>`).join('')}
+      <td>${U.num(U.sum(Object.values(shipTotal)))}</td><td></td></tr></tbody>`;
+}
+
+/* ---------- 부트 ---------- */
+document.querySelectorAll('.nav button').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); document.getElementById('t-'+b.dataset.t).classList.add('on'); };
+});
+document.getElementById('lt').onchange = render;
+
+(async()=>{
+  await SIORE.load();
+  SIORE.renderStatus(document.getElementById('status'));
+  render(); renderFlow();
+})();
+</script>
+</body>
+</html>
