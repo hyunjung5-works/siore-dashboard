@@ -19,10 +19,11 @@
       </div>
     </a>
     <div class="hdr-right">
-      <label class="pill" style="gap:5px">
-        환율 $1 =
-        <input id="fx" type="number" value="1380" step="10"
-          style="width:58px;background:transparent;border:none;color:var(--mint);font-weight:700;font-family:inherit;font-size:11px;text-align:right">
+      <span class="pill" id="fx"><span class="dot"></span>환율 로딩…</span>
+      <label class="pill" style="gap:5px" title="필요 시 환율을 수동으로 덮어쓸 수 있습니다">
+        수동
+        <input id="fx-in" type="number" step="1"
+          style="width:56px;background:transparent;border:none;font-weight:700;font-family:inherit;font-size:11px;text-align:right">
         원
       </label>
       <span class="pill" id="status"><span class="dot"></span>로딩…</span>
@@ -30,6 +31,10 @@
     </div>
   </div>
 </header>
+<style>
+  .chpane{ display:none; }
+  .chpane.on{ display:block; animation:fade .25s ease; }
+</style>
 
 <nav class="nav">
   <div class="nav-in">
@@ -129,48 +134,212 @@
 
 <!-- ============ 일간 ============ -->
 <div class="tab" id="t-day">
+
+  <!-- 일간 통합 실적 -->
   <div class="sec">
-    <div class="sec-h"><h2>일간 실적 · 아마존 US</h2><span class="note" id="day-note"></span></div>
+    <div class="sec-h"><h2>일간 통합 실적</h2><span class="note" id="day-note"></span></div>
     <div class="kpis">
-      <div class="kpi amz"><div class="kpi-l">최근일 매출</div><div class="kpi-v" id="d-rev">—</div><div class="kpi-s" id="d-rev-s">—</div></div>
-      <div class="kpi"><div class="kpi-l">최근일 판매량</div><div class="kpi-v" id="d-qty">—</div><div class="kpi-s" id="d-qty-s">—</div></div>
-      <div class="kpi"><div class="kpi-l">7일 평균 매출</div><div class="kpi-v" id="d-ma7">—</div><div class="kpi-s" id="d-ma7-s">—</div></div>
-      <div class="kpi"><div class="kpi-l">당월 누적 (MTD)</div><div class="kpi-v" id="d-mtd">—</div><div class="kpi-s" id="d-mtd-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">당일 매출 (통합)</div><div class="kpi-v" id="di-day">—</div><div class="kpi-s" id="di-day-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">월 누적 매출</div><div class="kpi-v" id="di-mtd">—</div><div class="kpi-s" id="di-mtd-s">—</div></div>
+      <div class="kpi"><div class="kpi-l">연간 누적 매출</div><div class="kpi-v" id="di-ytd">—</div><div class="kpi-s" id="di-ytd-s">—</div></div>
+      <div class="kpi amz"><div class="kpi-l">당일 판매량</div><div class="kpi-v" id="di-qty">—</div><div class="kpi-s" id="di-qty-s">—</div></div>
     </div>
   </div>
 
-  <div class="sec card">
-    <div class="card-h"><h3>일자별 매출 · 7일 이동평균</h3>
-      <div class="seg" id="seg-day">
-        <button data-d="30" class="on">30일</button>
-        <button data-d="60">60일</button>
-        <button data-d="90">90일</button>
-        <button data-d="999">전체</button>
+  <!-- 채널 선택 -->
+  <div class="sec">
+    <div class="seg" id="seg-ch" style="width:100%;display:grid;grid-template-columns:repeat(4,1fr)">
+      <button class="on" data-c="amazon">🛒 아마존 US</button>
+      <button data-c="b2b">🤝 B2B</button>
+      <button data-c="own">🏠 자사몰</button>
+      <button data-c="group">💊 공동구매</button>
+    </div>
+  </div>
+
+  <!-- ===== 아마존 ===== -->
+  <div class="chpane on" id="ch-amazon">
+    <div class="sec">
+      <div class="sec-h"><h2>🛒 아마존 US 일간 실적</h2><span class="note" id="a-note"></span></div>
+      <div class="kpis">
+        <div class="kpi amz"><div class="kpi-l">당일 매출</div><div class="kpi-v" id="d-rev">—</div><div class="kpi-s" id="d-rev-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">당일 판매량</div><div class="kpi-v" id="d-qty">—</div><div class="kpi-s" id="d-qty-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">월 누적 (MTD)</div><div class="kpi-v" id="d-mtd">—</div><div class="kpi-s" id="d-mtd-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">연 누적 (YTD)</div><div class="kpi-v" id="d-ytd">—</div><div class="kpi-s" id="d-ytd-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">7일 평균</div><div class="kpi-v" id="d-ma7">—</div><div class="kpi-s" id="d-ma7-s">—</div></div>
       </div>
     </div>
-    <div class="chart tall"><canvas id="c-day"></canvas></div>
+
+    <div class="sec card">
+      <div class="card-h"><h3>일자별 매출 · 7일 이동평균</h3>
+        <div class="seg" id="seg-day">
+          <button data-d="30" class="on">30일</button>
+          <button data-d="60">60일</button>
+          <button data-d="90">90일</button>
+          <button data-d="999">전체</button>
+        </div>
+      </div>
+      <div class="chart tall"><canvas id="c-day"></canvas></div>
+    </div>
+
+    <div class="sec grid g2">
+      <div class="card">
+        <div class="card-h"><h3>일자별 PV · 전환율 (주문/PV)</h3><span class="hint">트래픽 대비 구매 효율</span></div>
+        <div class="chart"><canvas id="c-pv"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>제품별 실적 (당일)</h3><span class="bdg bdg-good">실측</span></div>
+        <div id="a-top3"></div>
+        <div class="alert info" style="margin:12px 0 0;font-size:11.5px"><span class="ico">✅</span>
+          <div>시트 <b>[매출액] · [주문수량] · [PV]</b> 탭의 <b>날짜 × 제품 매트릭스</b>를 그대로 읽습니다.
+          누적 재구성 결과가 시트 제품별 탭과 <b>9개 SKU 전부 일치</b>합니다 ($117,565.60 / 3,609개 / PV 114,158).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec card">
+      <div class="card-h"><h3>제품별 일자 매출 (스택)</h3>
+        <span class="hint">어떤 SKU가 그날 매출을 만들었는가 — 시트 [매출액] 탭 실측</span>
+      </div>
+      <div class="chart tall"><canvas id="c-day-prod"></canvas></div>
+    </div>
+
+    <div class="sec card">
+      <div class="card-h"><h3>최근 21일 상세 (제품별 포함)</h3><span class="hint">USD 원본 + 당일 환율 원화 환산</span></div>
+      <div class="tbl-wrap" style="max-height:460px;overflow-y:auto"><table id="tb-day"></table></div>
+    </div>
   </div>
 
-  <div class="sec grid g2">
-    <div class="card">
-      <div class="card-h"><h3>일자별 PV · 전환율(주문/PV)</h3><span class="hint">트래픽 대비 구매 효율</span></div>
-      <div class="chart"><canvas id="c-pv"></canvas></div>
+  <!-- ===== B2B ===== -->
+  <div class="chpane" id="ch-b2b">
+    <div class="sec">
+      <div class="sec-h"><h2>🤝 B2B 일간 실적</h2><span class="note">거래처 4곳 · VAT 포함</span></div>
+      <div class="kpis">
+        <div class="kpi b2b"><div class="kpi-l">당일 매출</div><div class="kpi-v" id="b-day">—</div><div class="kpi-s" id="b-day-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">월 누적 (MTD)</div><div class="kpi-v" id="b-mtd">—</div><div class="kpi-s" id="b-mtd-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">연 누적 (YTD)</div><div class="kpi-v" id="b-ytd">—</div><div class="kpi-s" id="b-ytd-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">거래 거래처</div><div class="kpi-v" id="b-acc">—</div><div class="kpi-s" id="b-acc-s">—</div></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-h"><h3>최근 14일 상세</h3><span class="hint">아마존 US</span></div>
-      <div class="tbl-wrap" style="max-height:290px;overflow-y:auto"><table id="tb-day"></table></div>
+
+    <div class="alert bad"><span class="ico">🚫</span>
+      <div><b>일간 실적을 낼 수 없습니다 — 시트 구조 문제</b><br>
+      B2B 시트는 <b>거래처 × 월</b> 매트릭스라 주문일자·품목 정보가 없습니다.
+      일간 실적과 제품 TOP3를 켜려면 시트에 <b>주문일자 / 거래처 / 품목 / 수량 / 금액</b> 열을 가진
+      <code>RAW</code> 탭을 추가하고, 현재의 월 매트릭스를 그 탭에서 피벗으로 뽑아내는 구조로 바꿔야 합니다.</div>
+    </div>
+
+    <div class="sec grid g2">
+      <div class="card">
+        <div class="card-h"><h3>월별 B2B 매출</h3><span class="hint">현재 확보 가능한 최소 단위</span></div>
+        <div class="chart"><canvas id="c-b2b-m"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>매출 TOP3 (거래처)</h3><span class="bdg bdg-mute">제품 데이터 없음</span></div>
+        <div id="b-top3"></div>
+        <div class="tbl-wrap" style="margin-top:12px"><table id="tb-b2b-d"></table></div>
+      </div>
+    </div>
+
+    <div class="sec card">
+      <div class="card-h"><h3>B2B 출고량 vs 매출 인식 — 갭 점검</h3><span class="hint">재고 시트의 B2B 출고와 매출 시트를 대조</span></div>
+      <div class="chart"><canvas id="c-b2b-gap"></canvas></div>
+      <div class="alert warn" style="margin:14px 0 0"><span class="ico">⚠️</span><div id="b2b-gap-note">—</div></div>
     </div>
   </div>
+
+  <!-- ===== 자사몰 ===== -->
+  <div class="chpane" id="ch-own">
+    <div class="sec">
+      <div class="sec-h"><h2>🏠 자사몰 일간 실적</h2><span class="note" id="o-note"></span></div>
+      <div class="kpis">
+        <div class="kpi own"><div class="kpi-l">당일 매출</div><div class="kpi-v" id="o-day">—</div><div class="kpi-s" id="o-day-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">당일 주문 / 수량</div><div class="kpi-v" id="o-cnt">—</div><div class="kpi-s" id="o-cnt-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">월 누적 (MTD)</div><div class="kpi-v" id="o-mtd">—</div><div class="kpi-s" id="o-mtd-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">연 누적 (YTD)</div><div class="kpi-v" id="o-ytd">—</div><div class="kpi-s" id="o-ytd-s">—</div></div>
+        <div class="kpi"><div class="kpi-l">7일 평균</div><div class="kpi-v" id="o-ma7">—</div><div class="kpi-s" id="o-ma7-s">—</div></div>
+      </div>
+    </div>
+
+    <div class="sec card">
+      <div class="card-h"><h3>일자별 매출 · 7일 이동평균</h3>
+        <div class="seg" id="seg-oday">
+          <button data-d="30" class="on">30일</button>
+          <button data-d="60">60일</button>
+          <button data-d="90">90일</button>
+          <button data-d="999">전체</button>
+        </div>
+      </div>
+      <div class="chart tall"><canvas id="c-o-day"></canvas></div>
+    </div>
+
+    <div class="sec grid g2">
+      <div class="card">
+        <div class="card-h"><h3>제품별 실적 (당일)</h3><span class="bdg bdg-good">실측</span></div>
+        <div id="o-top3"></div>
+        <div class="alert info" style="margin:12px 0 0;font-size:11.5px"><span class="ico">👥</span>
+          <div><b>일반주문 기준</b>입니다. 임직원 매출(연간 <b id="o-staff2">—</b>)은 제품 집계에서 제외했습니다 —
+          섞으면 실제 시장 성과가 왜곡됩니다.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>요일별 매출 패턴</h3><span class="hint">언제 프로모션을 걸어야 하는가</span></div>
+        <div class="chart"><canvas id="c-o-dow"></canvas></div>
+      </div>
+    </div>
+
+    <div class="sec card">
+      <div class="card-h"><h3>제품별 일자 매출 (스택)</h3><span class="hint">그날 매출을 만든 SKU — 시트 [2_계산] 실측</span></div>
+      <div class="chart tall"><canvas id="c-o-prod"></canvas></div>
+    </div>
+
+    <div class="sec grid g2">
+      <div class="card">
+        <div class="card-h"><h3>최근 21일 상세</h3><span class="hint">일반주문 + 임직원 분리</span></div>
+        <div class="tbl-wrap" style="max-height:420px;overflow-y:auto"><table id="tb-o-day"></table></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>제품 × 월 매출 (일반주문)</h3></div>
+        <div class="tbl-wrap" style="max-height:420px;overflow-y:auto"><table id="tb-own-pm"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 공동구매 ===== -->
+  <div class="chpane" id="ch-group">
+    <div class="sec">
+      <div class="sec-h"><h2>💊 공동구매 일간 실적</h2><span class="note">국내공구 (약사님)</span></div>
+      <div class="kpis">
+        <div class="kpi grp"><div class="kpi-l">당일 매출</div><div class="kpi-v">—</div><div class="kpi-s">소스 미연결</div></div>
+        <div class="kpi"><div class="kpi-l">월 누적</div><div class="kpi-v">—</div><div class="kpi-s">소스 미연결</div></div>
+        <div class="kpi"><div class="kpi-l">연 누적</div><div class="kpi-v">—</div><div class="kpi-s">소스 미연결</div></div>
+        <div class="kpi"><div class="kpi-l">TOP3 제품</div><div class="kpi-v">—</div><div class="kpi-s">소스 미연결</div></div>
+      </div>
+    </div>
+
+    <div class="sec card">
+      <div class="empty">
+        <div class="big">💊</div>
+        <b>공동구매 매출 데이터가 아직 없습니다</b>
+        시트가 준비되면 <code>assets/data.js</code>의 <code>SOURCES</code>에<br>
+        <code>groupBuy: { id:'&lt;시트ID&gt;', gid:'&lt;탭GID&gt;' }</code> 한 줄만 추가하면<br>
+        메인·매출 대시보드 전체에 자동 반영됩니다.
+      </div>
+      <div class="alert info" style="margin:16px 0 0"><span class="ico">📋</span>
+        <div><b>시트를 만들 때 이 컬럼 구조를 권장합니다</b> — 그래야 일간 실적과 제품 TOP3가 바로 켜집니다.<br>
+        <code>주문일자 · 약사(공구주최) · 품목 · 수량 · 단가 · 매출액 · 수수료 · 정산상태</code></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ============ 유통처 상세 ============ -->
 <div class="tab" id="t-ch">
-  <div class="alert warn"><span class="ico">🔎</span>
-    <div><b>데이터 정합성 확인 필요 — 아마존 시트</b> ·
-    같은 시트 안에서 총매출이 <span class="mono">$116,227.80</span>(제품별 탭)과 <span class="mono">$114,016.80</span>(월별 요약)로,
-    판매량이 <span class="mono">3,566</span>과 <span class="mono">3,594</span>로 서로 다릅니다
-    (차이 <b>$2,211 · 28개</b>). 이 대시보드는 <b>일자별 RAW 합계</b>($114,016.80 / 3,566개)를 기준으로 계산합니다.
-    시트에서 어느 쪽이 맞는지 확정해 주세요.</div>
+  <div class="alert info"><span class="ico">✅</span>
+    <div><b>아마존 데이터 소스 — 날짜 × 제품 매트릭스 사용</b> ·
+    이 대시보드는 시트의 <span class="mono">[매출액] / [주문수량] / [PV]</span> 탭(날짜×제품)을 단일 기준으로 씁니다.
+    재구성 결과 <b>$117,565.60 / 3,609개 / PV 114,158</b> 로 제품별 탭과 <b>9개 SKU 전부 일치</b>합니다.<br>
+    <span style="color:var(--warn)">참고: <b>Dashboard 탭의 '날짜별' 블록은 $115,324.20으로 $2,241 낮습니다</b> — 그쪽 수식이 최신 단가를 못 따라간 것으로 보입니다. 시트에서 정리해 두시면 좋습니다.</span></div>
   </div>
   <div class="sec grid g2">
     <div class="card">
@@ -328,9 +497,9 @@ function renderMonthly(){
              pointRadius: mode==='line'?3:0, pointBackgroundColor:d.borderColor })) },
     options: CH.base({
       scales:{
-        x:{ stacked: mode==='stack', grid:{display:false}, ticks:{color:'#6C777E',font:{size:11}}, border:{color:'#2A3035'} },
-        y:{ stacked: mode==='stack', grid:{color:'#21262B'}, border:{display:false}, beginAtZero:true,
-            ticks:{ color:'#6C777E', font:{size:10.5}, callback:v=> (v/10000).toLocaleString()+'만' } },
+        x:{ stacked: mode==='stack', grid:{display:false}, ticks:{color:'#7C8891',font:{size:11}}, border:{color:'#D8DEE1'} },
+        y:{ stacked: mode==='stack', grid:{color:'#E6EBED'}, border:{display:false}, beginAtZero:true,
+            ticks:{ color:'#7C8891', font:{size:10.5}, callback:v=> (v/10000).toLocaleString()+'만' } },
       },
       plugins:{ ...CH.base().plugins,
         tooltip:{ ...CH.base().plugins.tooltip,
@@ -343,9 +512,9 @@ function renderMonthly(){
     type:'doughnut',
     data:{ labels:['아마존 US','자사몰','B2B','국내공구'],
       datasets:[{ data:[tAmz,tOwn,tB2b,tGrp||0.0001],
-        backgroundColor:[CH.cyan,CH.mint,CH.purple,'#2A3035'], borderColor:'#16191C', borderWidth:3, hoverOffset:8 }] },
+        backgroundColor:[CH.cyan,CH.mint,CH.purple,'#D8DEE1'], borderColor:'#FFFFFF', borderWidth:3, hoverOffset:8 }] },
     options: CH.base({ cutout:'62%', scales:{},
-      plugins:{ legend:{ position:'bottom', labels:{ color:'#A7B1B8', usePointStyle:true, pointStyle:'circle', boxWidth:9, font:{size:11.5,weight:'600'}, padding:12 } },
+      plugins:{ legend:{ position:'bottom', labels:{ color:'#4E5A61', usePointStyle:true, pointStyle:'circle', boxWidth:9, font:{size:11.5,weight:'600'}, padding:12 } },
         tooltip:{ ...CH.base().plugins.tooltip,
           callbacks:{ label: c => ` ${c.label}: ${U.krwM(c.parsed)}원 (${(c.parsed/tAll*100).toFixed(1)}%)` } } } })
   });
@@ -366,12 +535,12 @@ function renderMonthly(){
   ck('c-mom', {
     type:'bar',
     data:{ labels, datasets:[{ label:'MoM 성장률', data:mom, borderRadius:5, barPercentage:.55,
-      backgroundColor: mom.map(v=> v==null ? '#2A3035' : (v>=0 ? CH.mint : CH.red)) }] },
+      backgroundColor: mom.map(v=> v==null ? '#D8DEE1' : (v>=0 ? CH.mint : CH.red)) }] },
     options: CH.base({ plugins:{ legend:{display:false},
       tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.parsed.y==null?'—':c.parsed.y.toFixed(1)+'%'}` } } },
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:11}},border:{color:'#2A3035'}},
-               y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:false,
-                  ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'%'}} } })
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:11}},border:{color:'#D8DEE1'}},
+               y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:false,
+                  ticks:{color:'#7C8891',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 
   // 자사몰 취소
@@ -379,16 +548,16 @@ function renderMonthly(){
   ck('c-cancel', {
     data:{ labels:O.map(r=>r[0].slice(5)+'월'),
       datasets:[
-        { type:'bar', label:'취소금액', data:O.map(r=>r[8]), backgroundColor:'rgba(255,107,107,.55)', borderRadius:5, barPercentage:.55, yAxisID:'y' },
+        { type:'bar', label:'취소금액', data:O.map(r=>r[8]), backgroundColor:'rgba(229,72,77,.55)', borderRadius:5, barPercentage:.55, yAxisID:'y' },
         { type:'line', label:'취소율(금액)', data:O.map(r=> r[3]+r[8] ? +(r[8]/(r[3]+r[8])*100).toFixed(1) : 0),
           borderColor:CH.gold, backgroundColor:CH.gold, borderWidth:2, tension:.35, pointRadius:3, yAxisID:'y1' },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:11}},border:{color:'#2A3035'}},
-        y:{ position:'left', grid:{color:'#21262B'}, border:{display:false}, beginAtZero:true,
-            ticks:{color:'#6C777E',font:{size:10.5},callback:v=>(v/10000)+'만'} },
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:11}},border:{color:'#D8DEE1'}},
+        y:{ position:'left', grid:{color:'#E6EBED'}, border:{display:false}, beginAtZero:true,
+            ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000)+'만'} },
         y1:{ position:'right', grid:{display:false}, border:{display:false}, beginAtZero:true,
-            ticks:{color:'#F6C85F',font:{size:10.5},callback:v=>v+'%'} } } })
+            ticks:{color:'#D9A21B',font:{size:10.5},callback:v=>v+'%'} } } })
   });
 }
 
@@ -424,16 +593,16 @@ function renderWeekly(){
     data:{ labels:last.map(w=>w.range),
       datasets:[
         { type:'bar', label:'매출 (USD)', data:last.map(w=>+w.usd.toFixed(0)),
-          backgroundColor:ctx=>CH.grad(ctx.chart, '#35D6F0', .85, .35), borderRadius:5, barPercentage:.6, yAxisID:'y' },
+          backgroundColor:ctx=>CH.grad(ctx.chart, '#1FA8C9', .85, .35), borderRadius:5, barPercentage:.6, yAxisID:'y' },
         { type:'line', label:'PV', data:last.map(w=>w.pv), borderColor:CH.mint, backgroundColor:CH.mint,
           borderWidth:2, tension:.35, pointRadius:3, yAxisID:'y1' },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10}},border:{color:'#2A3035'}},
-        y:{ position:'left', grid:{color:'#21262B'}, border:{display:false}, beginAtZero:true,
-            ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+(v/1000).toFixed(0)+'k'} },
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10}},border:{color:'#D8DEE1'}},
+        y:{ position:'left', grid:{color:'#E6EBED'}, border:{display:false}, beginAtZero:true,
+            ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+(v/1000).toFixed(0)+'k'} },
         y1:{ position:'right', grid:{display:false}, border:{display:false}, beginAtZero:true,
-            ticks:{color:'#2EE6C5',font:{size:10.5},callback:v=>(v/1000).toFixed(0)+'k'} } } })
+            ticks:{color:'#0FB89A',font:{size:10.5},callback:v=>(v/1000).toFixed(0)+'k'} } } })
   });
 
   document.getElementById('tb-wk').innerHTML =
@@ -482,35 +651,324 @@ function renderWeekly(){
 function ma(arr, n){
   return arr.map((_,i)=> i<n-1 ? null : +(U.sum(arr.slice(i-n+1,i+1))/n).toFixed(1));
 }
+const LAST_DAY = D.amazonDaily[D.amazonDaily.length-1][0];
+const CUR_M    = LAST_DAY.slice(0,7);
+
+function top3html(list, fmt){
+  if(!list.length) return `<div style="font-size:12px;color:var(--tx-3);padding:16px 0;text-align:center">데이터 없음</div>`;
+  const max = Math.max(...list.map(x=>x.rev));
+  return `<div class="rank">${list.map((x,i)=>`
+    <div class="rank-i">
+      <span class="rank-n">${i+1}</span>
+      <div class="rank-b">
+        <div class="rank-t">
+          <span>${x.n}</span>
+          <span>${x.qty!=null?`<b style="color:var(--tx-3);font-weight:600">${x.qty}개</b> · `:''}${fmt(x.rev)}</span>
+        </div>
+        <div class="rank-bar"><i style="width:${(x.rev/max*100).toFixed(1)}%"></i></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
 function renderDaily(){
   const A = D.amazonDaily;
+  const FX = CONFIG.fxUSDKRW;
   const last = A[A.length-1], prev = A[A.length-2];
-  const set=(id,v,s)=>{ document.getElementById(id).textContent=v; document.getElementById(id+'-s').innerHTML=s; };
+  const set=(id,v,s)=>{ const e=document.getElementById(id); if(!e) return;
+    e.innerHTML=v; const se=document.getElementById(id+'-s'); if(se && s!=null) se.innerHTML=s; };
 
-  const dRev=U.delta(last[3],prev[3]), dQty=U.delta(last[2],prev[2]);
+  const O = ownByMonth(), B = b2bByMonth();
+
+  /* ---- 일간 통합 실적 (아마존 + 자사몰 실측, B2B는 월간만) ---- */
+  const amzYTD = U.sum(A, r=>r[3]);
+  const mtdRows = A.filter(r=>r[0].startsWith(CUR_M));
+  const amzMTD = U.sum(mtdRows, r=>r[3]);
+
+  const ownLast = D.ownDay(D.ownLastDay);
+  const ownMTD  = D.ownRange(CUR_M+'-01');
+  const ownYTD  = D.ownRange();
+
+  const totDay = last[3]*FX + ownLast.gross;
+  const totMTD = amzMTD*FX + ownMTD.gross + (B[CUR_M]||0);
+  const totYTD = amzYTD*FX + ownYTD.gross + U.sum(D.b2bAccounts,a=>U.sum(a[1]));
+  const dDay = U.delta(last[3], prev[3]);
+
+  set('di-day', U.krw(totDay),
+    `아마존 ${U.krwM(last[3]*FX)} (${U.usd2(last[3])}) · 자사몰 ${U.krwM(ownLast.gross)}`);
+  set('di-mtd', U.krwM(totMTD)+'원',
+    `아마존 ${U.krwM(amzMTD*FX)} · 자사몰 ${U.krwM(ownMTD.gross)} · B2B ${U.krwM(B[CUR_M]||0)}`);
+  set('di-ytd', U.krwM(totYTD)+'원', `환율 $1 = ${FX.toLocaleString('ko-KR')}원 적용`);
+  set('di-qty', U.num(last[2]+ownLast.qty)+'개',
+    `아마존 ${last[2]}개 (<span class="${dDay.cls}">${dDay.tx}</span>) · 자사몰 ${ownLast.qty}개 / ${ownLast.orders}건`);
+  document.getElementById('day-note').innerHTML =
+    `아마존 <b>${LAST_DAY}</b> (리포팅 지연 · 한국 -2일) · 자사몰 <b>${D.ownLastDay}</b> ·
+     <span style="color:var(--warn)">B2B는 일자별 원천 없음 (월간만)</span>`;
+
+  /* ---- 아마존 ---- */
   const l7 = A.slice(-7), p7 = A.slice(-14,-7);
   const avg7 = U.sum(l7,r=>r[3])/7, pavg7 = U.sum(p7,r=>r[3])/7;
-  const d7 = U.delta(avg7, pavg7);
+  const d7 = U.delta(avg7, pavg7), dQty = U.delta(last[2], prev[2]);
+  const prevMRows = A.filter(r=>r[0].startsWith('2026-06')).slice(0, mtdRows.length);
+  const dm = U.delta(amzMTD, U.sum(prevMRows,r=>r[3]));
 
-  const mtdRows = A.filter(r=>r[0].startsWith('2026-07'));
-  const mtd = U.sum(mtdRows,r=>r[3]);
-  const junRows = A.filter(r=>r[0].startsWith('2026-06')).slice(0, mtdRows.length);
-  const junSame = U.sum(junRows,r=>r[3]);
-  const dm = U.delta(mtd, junSame);
-
-  set('d-rev', U.usd2(last[3]), `${last[0]} · <span class="${dRev.cls}">${dRev.tx}</span> 전일`);
-  set('d-qty', U.num(last[2]), `<span class="${dQty.cls}">${dQty.tx}</span> 전일 · PV ${U.num(last[1])}`);
-  set('d-ma7', U.usd2(avg7), `<span class="${d7.cls}">${d7.tx}</span> 직전 7일 대비`);
-  set('d-mtd', U.usd(mtd), `7월 ${mtdRows.length}일 · 6월 동일기간 대비 <span class="${dm.cls}">${dm.tx}</span>`);
-  document.getElementById('day-note').textContent = `아마존 US · ${A[0][0]} ~ ${last[0]}`;
+  set('d-rev', U.usdWithKrw(last[3]), `<span class="${dDay.cls}">${dDay.tx}</span> 전일 대비`);
+  set('d-qty', U.num(last[2])+'개', `<span class="${dQty.cls}">${dQty.tx}</span> 전일 · PV ${U.num(last[1])}`);
+  set('d-mtd', U.usdWithKrw(amzMTD, '21px'), `${CUR_M.slice(5)}월 ${mtdRows.length}일 · 전월 동기 <span class="${dm.cls}">${dm.tx}</span>`);
+  set('d-ytd', U.usdWithKrw(amzYTD, '21px'), `${A[0][0]} ~ ${LAST_DAY}`);
+  set('d-ma7', U.usdWithKrw(avg7, '21px'), `<span class="${d7.cls}">${d7.tx}</span> 직전 7일 대비`);
+  document.getElementById('a-note').textContent = `${A[0][0]} ~ ${LAST_DAY} · ${A.length}일치`;
 
   drawDaily(30);
   drawPV();
+  drawDayProduct(30);
 
+  // 당일 제품별 실측 (시트 [매출액]/[주문수량] 탭)
+  const amzDayP = D.amazonDayProducts(LAST_DAY);
+  document.getElementById('a-top3').innerHTML = top3html(amzDayP, v=>U.usdWithKrwInline(v));
+
+  // 최근 21일 상세 — 당일 1위 제품까지
   document.getElementById('tb-day').innerHTML =
-    `<thead><tr><th>날짜</th><th>매출 USD</th><th>판매량</th><th>PV</th><th>전환율</th></tr></thead><tbody>
-    ${A.slice(-14).reverse().map(r=>`<tr><td>${r[0]}</td><td>${U.usd2(r[3])}</td><td>${r[2]}</td>
-      <td>${U.num(r[1])}</td><td>${r[1]?(r[2]/r[1]*100).toFixed(2)+'%':'—'}</td></tr>`).join('')}</tbody>`;
+    `<thead><tr><th>날짜</th><th>매출 USD</th><th>매출 원화</th><th>판매량</th><th>PV</th><th>전환율</th><th>1위 제품 (매출/수량)</th><th>전일 대비</th></tr></thead><tbody>
+    ${A.slice(-21).reverse().map((r,i,arr)=>{
+      const p = arr[i+1];
+      const d = U.delta(r[3], p?.[3]);
+      const top = D.amazonDayProducts(r[0])[0];
+      return `<tr><td>${r[0]}</td><td><b style="color:var(--tx)">${U.usd2(r[3])}</b></td>
+        <td>${U.krw(r[3]*FX)}</td><td>${r[2]}</td><td>${U.num(r[1])}</td>
+        <td>${r[1]?(r[2]/r[1]*100).toFixed(2)+'%':'—'}</td>
+        <td style="text-align:left;font-size:11.5px">${top ? `${top.n} <span style="color:var(--tx-3)">${U.usd2(top.rev)} / ${top.qty}개</span>` : '—'}</td>
+        <td class="${d.cls}">${d.tx}</td></tr>`;
+    }).join('')}</tbody>`;
+
+  renderB2BDaily(); renderOwnDaily();
+}
+
+/* 제품별 일자 매출 스택 */
+function drawDayProduct(n){
+  const P = n>=999 ? D.amazonDailyProduct : D.amazonDailyProduct.slice(-n);
+  const N = D.amazonProductNames;
+  // 기간 내 매출 있는 제품만
+  const active = N.map((nm,i)=>({nm, i, tot:P.reduce((a,r)=>a+r[2][i],0)}))
+                  .filter(x=>x.tot>0).sort((a,b)=>b.tot-a.tot);
+  ck('c-day-prod', {
+    type:'bar',
+    data:{ labels:P.map(r=>r[0].slice(5)),
+      datasets: active.map((x,k)=>({
+        label:x.nm, data:P.map(r=>r[2][x.i]),
+        backgroundColor:CH.palette[k%CH.palette.length], borderRadius:2,
+        barPercentage:.9, categoryPercentage:.92 })) },
+    options: CH.base({
+      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:18},border:{color:'#D8DEE1'}},
+        y:{stacked:true,grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}} },
+      plugins:{ ...CH.base().plugins,
+        legend:{ position:'top', align:'end',
+          labels:{ color:'#4E5A61', boxWidth:9, boxHeight:9, usePointStyle:true, pointStyle:'circle',
+                   font:{size:10.5, weight:'600'}, padding:10 } },
+        tooltip:{ ...CH.base().plugins.tooltip,
+          callbacks:{ label:c=> c.parsed.y ? ` ${c.dataset.label}: ${U.usd2(c.parsed.y)}` : null } } },
+    })
+  });
+}
+
+/* ---- B2B 패널 ---- */
+function renderB2BDaily(){
+  const B = b2bByMonth();
+  const set=(id,v,s)=>{ const e=document.getElementById(id); if(!e)return; e.innerHTML=v;
+    const se=document.getElementById(id+'-s'); if(se&&s!=null) se.innerHTML=s; };
+  const ytd = U.sum(D.b2bAccounts, a=>U.sum(a[1]));
+  const active = D.b2bAccounts.filter(a=>U.sum(a[1])>0);
+
+  set('b-day', '—', '일자별 원천 없음');
+  set('b-mtd', U.krwM(B[CUR_M]||0)+'원', CUR_M);
+  set('b-ytd', U.krwM(ytd)+'원', 'VAT 포함 · 2026 YTD');
+  set('b-acc', active.length+'곳', `등록 ${D.b2bAccounts.length}곳`);
+
+  const months = D.b2bMonths.slice(0,4);
+  ck('c-b2b-m', {
+    type:'bar',
+    data:{ labels:months.map(m=>m.slice(2)),
+      datasets: D.b2bAccounts.filter(a=>U.sum(a[1])>0).map((a,i)=>({
+        label:a[0], data:a[1].slice(0,4), backgroundColor:CH.palette[i%CH.palette.length],
+        borderRadius:5, barPercentage:.6 })) },
+    options: CH.base({
+      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#7C8891',font:{size:11}},border:{color:'#D8DEE1'}},
+        y:{stacked:true,grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000).toLocaleString()+'만'}} },
+      plugins:{ ...CH.base().plugins,
+        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.dataset.label}: ${U.krw(c.parsed.y)}` } } } })
+  });
+
+  const top3 = D.b2bAccounts.map(([n,v])=>({n, rev:U.sum(v)})).sort((a,b)=>b.rev-a.rev).slice(0,3).filter(x=>x.rev>0);
+  document.getElementById('b-top3').innerHTML = top3html(top3, v=>U.krwM(v)+'원');
+
+  document.getElementById('tb-b2b-d').innerHTML =
+    `<thead><tr><th>거래처</th>${months.map(m=>`<th>${m.slice(5)}월</th>`).join('')}<th>합계</th></tr></thead><tbody>
+    ${D.b2bAccounts.map(([n,v])=>{
+      const t=U.sum(v);
+      return `<tr><td>${n}</td>${v.slice(0,4).map(x=>`<td>${x?U.krwM(x):'—'}</td>`).join('')}
+        <td>${t?`<b style="color:var(--tx)">${U.krwM(t)}</b>`:'<span class="bdg bdg-mute">0</span>'}</td></tr>`;
+    }).join('')}</tbody>`;
+
+  // 출고 vs 매출 갭
+  const ship = D.shipChannelMonth.rows.find(r=>r[0]==='B2B')[1];   // 4,5,6,7월 수량
+  const revM = ['2026-04','2026-05','2026-06','2026-07'].map(m=> B[m]||0);
+  ck('c-b2b-gap', {
+    data:{ labels:['4월','5월','6월','7월*'],
+      datasets:[
+        { type:'bar', label:'B2B 출고량 (개)', data:ship, backgroundColor:'rgba(124,95,224,.5)',
+          borderRadius:5, barPercentage:.6, yAxisID:'y' },
+        { type:'line', label:'B2B 매출 인식 (원)', data:revM, borderColor:CH.mint, borderWidth:2.4,
+          tension:.3, pointRadius:4, pointBackgroundColor:CH.mint, yAxisID:'y1' },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:11}},border:{color:'#D8DEE1'}},
+        y:{position:'left',grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>v+'개'}},
+        y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
+           ticks:{color:'#0FB89A',font:{size:10.5},callback:v=>(v/10000).toLocaleString()+'만'}} } })
+  });
+
+  const shipTot = U.sum(ship), revTot = U.sum(revM);
+  document.getElementById('b2b-gap-note').innerHTML =
+    `4~7월 B2B <b>출고 ${U.num(shipTot)}개</b> vs <b>매출 인식 ${U.krwM(revTot)}원</b>.
+     특히 <b>6월에 738개가 나갔는데 매출은 ₩3.17M(그리니스트 1곳)</b>뿐입니다.
+     출고 1개당 매출로 환산하면 <b>${U.krw(revTot/shipTot)}/개</b> — 자사몰 객단가(${U.krwM(D.ownTotals.aov)}원) 대비 현저히 낮습니다.
+     <b>샘플·무상공급이 출고에 섞여 있거나, 매출 인식이 지연되고 있다는 뜻입니다.</b>
+     실행: B2B 시트에 <b>주문일자·품목·수량·금액</b> 열을 추가하고, 무상공급은 별도 플래그로 분리하세요.`;
+}
+
+/* ---- 자사몰 패널 (일자별 실측) ---- */
+const OWN_LAST = D.ownLastDay;
+const OWN_M    = OWN_LAST.slice(0,7);
+
+function renderOwnDaily(){
+  const set=(id,v,s)=>{ const e=document.getElementById(id); if(!e)return; e.innerHTML=v;
+    const se=document.getElementById(id+'-s'); if(se&&s!=null) se.innerHTML=s; };
+  const OD = D.ownDaily;
+  const last = OD[OD.length-1], prev = OD[OD.length-2];
+
+  const mtd = D.ownRange(OWN_M+'-01', OWN_LAST);
+  const ytd = D.ownRange();
+  const dRev = U.delta(last[3], prev[3]);
+
+  // 7일 평균 — 매출 없는 날(0)도 포함해야 실제 일평균
+  const dayNums = (from,to)=>{ const a=new Date(from+'T00:00:00Z'), b=new Date(to+'T00:00:00Z');
+    return Math.round((b-a)/86400000)+1; };
+  const l7from = new Date(new Date(OWN_LAST+'T00:00:00Z').getTime()-6*86400000).toISOString().slice(0,10);
+  const p7from = new Date(new Date(OWN_LAST+'T00:00:00Z').getTime()-13*86400000).toISOString().slice(0,10);
+  const p7to   = new Date(new Date(OWN_LAST+'T00:00:00Z').getTime()-7*86400000).toISOString().slice(0,10);
+  const avg7   = D.ownRange(l7from, OWN_LAST).gross / 7;
+  const pavg7  = D.ownRange(p7from, p7to).gross / 7;
+  const d7 = U.delta(avg7, pavg7);
+
+  set('o-day', U.krw(last[3]), `${last[0]} · <span class="${dRev.cls}">${dRev.tx}</span> 전 영업일 대비`);
+  set('o-cnt', `${last[1]}건 / ${last[2]}개`, `객단가 ${last[1]?U.krw(last[3]/last[1]):'—'}`);
+  set('o-mtd', U.krwM(mtd.gross)+'원', `${mtd.orders}건 · ${mtd.qty}개 · 매출발생 ${mtd.days}일`);
+  set('o-ytd', U.krwM(ytd.gross)+'원', `${ytd.orders}건 · ${ytd.qty}개 · 순매출 ${U.krwM(ytd.net)}원`);
+  set('o-ma7', U.krwM(avg7)+'원', `<span class="${d7.cls}">${d7.tx}</span> 직전 7일 대비`);
+  document.getElementById('o-note').innerHTML =
+    `${OD[0][0]} ~ <b>${OWN_LAST}</b> · 매출 발생 ${OD.length}일 · 시트 <span class="mono">[2_계산]</span> 주문라인 원본 집계`;
+  document.getElementById('o-staff2').textContent = U.krwM(ytd.staff)+'원';
+
+  drawOwnDaily(30);
+  drawOwnProd(30);
+
+  // 당일 제품별
+  document.getElementById('o-top3').innerHTML =
+    top3html(D.ownDayProducts(OWN_LAST), v=>U.krw(v));
+
+  // 요일별 패턴
+  const DOW = ['일','월','화','수','목','금','토'];
+  const dow = Array(7).fill(0), dowN = Array(7).fill(0);
+  OD.forEach(r=>{ const k = new Date(r[0]+'T00:00:00Z').getUTCDay(); dow[k]+=r[3]; dowN[k]++; });
+  ck('c-o-dow', {
+    type:'bar',
+    data:{ labels:DOW,
+      datasets:[{ label:'요일 평균 매출', data:dow.map((v,i)=> dowN[i]? Math.round(v/dowN[i]) : 0),
+        backgroundColor:DOW.map((_,i)=> i===0||i===6 ? 'rgba(124,95,224,.55)' : CH.mint),
+        borderRadius:5, barPercentage:.65 }] },
+    options: CH.base({ plugins:{ legend:{display:false},
+        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` 평균 ${U.krw(c.parsed.y)} (${dowN[c.dataIndex]}일)` } } },
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:12,weight:'600'}},border:{color:'#D8DEE1'}},
+        y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000).toFixed(0)+'만'}} } })
+  });
+
+  // 최근 21일 표
+  document.getElementById('tb-o-day').innerHTML =
+    `<thead><tr><th>날짜</th><th>정가매출</th><th>순매출</th><th>주문</th><th>수량</th><th>임직원</th><th>1위 제품</th></tr></thead><tbody>
+    ${OD.slice(-21).reverse().map(r=>{
+      const top = D.ownDayProducts(r[0])[0];
+      return `<tr><td>${r[0]}</td><td><b style="color:var(--tx)">${U.krwM(r[3])}</b></td>
+        <td>${U.krwM(r[4])}</td><td>${r[1]}</td><td>${r[2]}</td>
+        <td>${r[5]?`<span class="bdg bdg-warn">${U.krwM(r[5])}</span>`:'—'}</td>
+        <td style="text-align:left;font-size:11.5px">${top?`${top.n} <span style="color:var(--tx-3)">${top.qty}개</span>`:'—'}</td></tr>`;
+    }).join('')}</tbody>`;
+
+  // 제품 × 월
+  const opm = D.ownProductMonthly;
+  const mi = opm.months.indexOf(OWN_M);
+  document.getElementById('tb-own-pm').innerHTML =
+    `<thead><tr><th>제품</th>${opm.months.map(m=>`<th>${m.slice(5)}월</th>`).join('')}<th>연간</th></tr></thead><tbody>
+    ${[...opm.rows].sort((a,b)=>U.sum(b[1])-U.sum(a[1])).map(([n,v])=>{
+      const t=U.sum(v);
+      return `<tr><td>${n}</td>${v.map((x,i)=>`<td${i===mi?' style="background:rgba(15,184,154,.07);font-weight:700;color:var(--tx)"':''}>${x?U.krwM(x):'—'}</td>`).join('')}
+        <td><b style="color:var(--tx)">${U.krwM(t)}</b></td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계 (일반주문)</td>${opm.months.map((m,i)=>`<td>${U.krwM(U.sum(opm.rows,r=>r[1][i]))}</td>`).join('')}
+      <td>${U.krwM(U.sum(opm.rows,r=>U.sum(r[1])))}</td></tr></tbody>`;
+}
+
+function drawOwnDaily(n){
+  const OD = n>=999 ? D.ownDaily : D.ownDaily.slice(-n);
+  const rev = OD.map(r=>r[3]);
+  ck('c-o-day', {
+    data:{ labels:OD.map(r=>r[0].slice(5)),
+      datasets:[
+        { type:'bar', label:'정가매출', data:rev, backgroundColor:'rgba(15,184,154,.5)',
+          borderRadius:3, barPercentage:.85, categoryPercentage:.9 },
+        { type:'bar', label:'임직원 매출', data:OD.map(r=>r[5]), backgroundColor:'rgba(217,162,27,.6)',
+          borderRadius:3, barPercentage:.85, categoryPercentage:.9 },
+        { type:'line', label:'7일 이동평균', data:ma(rev,7), borderColor:CH.cyan,
+          borderWidth:2.4, tension:.4, pointRadius:0, fill:false },
+      ]},
+    options: CH.base({
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:20},border:{color:'#D8DEE1'}},
+        y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000).toFixed(0)+'만'}} },
+      plugins:{ ...CH.base().plugins,
+        tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.dataset.label}: ${U.krw(c.parsed.y??0)}` } } },
+    })
+  });
+}
+
+function drawOwnProd(n){
+  const OD = n>=999 ? D.ownDaily : D.ownDaily.slice(-n);
+  const N = D.ownProductNames;
+  const tot = {};
+  OD.forEach(r=> r[6].forEach(([i,q,g])=>{ tot[i]=(tot[i]||0)+g; }));
+  const active = Object.entries(tot).map(([i,g])=>({i:+i,g})).filter(x=>x.g>0).sort((a,b)=>b.g-a.g).slice(0,8);
+  ck('c-o-prod', {
+    type:'bar',
+    data:{ labels:OD.map(r=>r[0].slice(5)),
+      datasets: active.map((x,k)=>({
+        label:N[x.i],
+        data:OD.map(r=>{ const e=r[6].find(p=>p[0]===x.i); return e?e[2]:0; }),
+        backgroundColor:CH.palette[k%CH.palette.length], borderRadius:2,
+        barPercentage:.9, categoryPercentage:.92 })) },
+    options: CH.base({
+      scales:{ x:{stacked:true,grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:18},border:{color:'#D8DEE1'}},
+        y:{stacked:true,grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000).toFixed(0)+'만'}} },
+      plugins:{ ...CH.base().plugins,
+        legend:{ position:'top', align:'end',
+          labels:{ color:'#4E5A61', boxWidth:9, boxHeight:9, usePointStyle:true, pointStyle:'circle',
+                   font:{size:10.5, weight:'600'}, padding:9 } },
+        tooltip:{ ...CH.base().plugins.tooltip,
+          callbacks:{ label:c=> c.parsed.y ? ` ${c.dataset.label}: ${U.krw(c.parsed.y)}` : null } } },
+    })
+  });
 }
 function drawDaily(n){
   const A = n>=999 ? D.amazonDaily : D.amazonDaily.slice(-n);
@@ -519,14 +977,14 @@ function drawDaily(n){
     data:{ labels:A.map(r=>r[0].slice(5)),
       datasets:[
         { type:'bar', label:'일 매출 (USD)', data:rev,
-          backgroundColor:'rgba(53,214,240,.42)', borderRadius:3, barPercentage:.85, categoryPercentage:.9 },
+          backgroundColor:'rgba(31,168,201,.42)', borderRadius:3, barPercentage:.85, categoryPercentage:.9 },
         { type:'line', label:'7일 이동평균', data:ma(rev,7), borderColor:CH.mint, backgroundColor:CH.mint,
           borderWidth:2.4, tension:.4, pointRadius:0, fill:false },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:20},border:{color:'#2A3035'}},
-        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}} },
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:20},border:{color:'#D8DEE1'}},
+        y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}} },
       plugins:{ ...CH.base().plugins,
         tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.dataset.label}: $${(c.parsed.y??0).toLocaleString()}` } } },
     })
@@ -538,16 +996,16 @@ function drawPV(){
     data:{ labels:A.map(r=>r[0].slice(5)),
       datasets:[
         { type:'line', label:'PV', data:A.map(r=>r[1]), borderColor:CH.cyan, borderWidth:2, tension:.35,
-          pointRadius:0, fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#35D6F0',.22,0), yAxisID:'y' },
+          pointRadius:0, fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#1FA8C9',.22,0), yAxisID:'y' },
         { type:'line', label:'전환율 (주문/PV)', data:A.map(r=> r[1]? +(r[2]/r[1]*100).toFixed(2):0),
           borderColor:CH.gold, borderWidth:2, tension:.35, pointRadius:0, yAxisID:'y1' },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:20},border:{color:'#2A3035'}},
-        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>(v/1000).toFixed(0)+'k'}},
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:20},border:{color:'#D8DEE1'}},
+        y:{position:'left',grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/1000).toFixed(0)+'k'}},
         y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
-           ticks:{color:'#F6C85F',font:{size:10.5},callback:v=>v+'%'}} } })
+           ticks:{color:'#D9A21B',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 }
 
@@ -584,9 +1042,9 @@ function renderChannels(){
       datasets:[{ label:'매출 (USD)', data:Object.values(AM).map(v=>+v.usd.toFixed(0)),
         backgroundColor:CH.cyan, borderRadius:5, barPercentage:.6 }] },
     options: CH.base({ plugins:{legend:{display:false},tooltip:CH.base().plugins.tooltip},
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:11}},border:{color:'#2A3035'}},
-        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+(v/1000).toFixed(0)+'k'}} } })
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:11}},border:{color:'#D8DEE1'}},
+        y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+(v/1000).toFixed(0)+'k'}} } })
   });
 
   ck('c-own-m', {
@@ -596,11 +1054,11 @@ function renderChannels(){
         { type:'line', label:'객단가', data:D.ownMonthly.map(r=>r[6]), borderColor:CH.gold, borderWidth:2, tension:.35, pointRadius:3, yAxisID:'y1' },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:11}},border:{color:'#2A3035'}},
-        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>(v/10000)+'만'}},
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:11}},border:{color:'#D8DEE1'}},
+        y:{position:'left',grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000)+'만'}},
         y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
-           ticks:{color:'#F6C85F',font:{size:10.5},callback:v=>(v/10000).toFixed(0)+'만'}} } })
+           ticks:{color:'#D9A21B',font:{size:10.5},callback:v=>(v/10000).toFixed(0)+'만'}} } })
   });
 
   // B2B
@@ -633,9 +1091,9 @@ function renderProducts(){
         backgroundColor:P.map((_,i)=>CH.palette[i%CH.palette.length]), borderRadius:5, barPercentage:.7 }] },
     options: CH.base({ indexAxis:'y', plugins:{legend:{display:false},tooltip:{...CH.base().plugins.tooltip,
         callbacks:{label:c=>` ${U.usd2(c.parsed.x)}`}}},
-      scales:{ x:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-                 ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+(v/1000).toFixed(0)+'k'}},
-               y:{grid:{display:false},border:{color:'#2A3035'},ticks:{color:'#A7B1B8',font:{size:10.5}}} } })
+      scales:{ x:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+                 ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+(v/1000).toFixed(0)+'k'}},
+               y:{grid:{display:false},border:{color:'#D8DEE1'},ticks:{color:'#4E5A61',font:{size:10.5}}} } })
   });
 
   const O = [...D.ownProduct].sort((a,b)=>b[1]-a[1]).slice(0,10);
@@ -646,9 +1104,9 @@ function renderProducts(){
         backgroundColor:O.map((_,i)=>CH.palette[i%CH.palette.length]), borderRadius:5, barPercentage:.7 }] },
     options: CH.base({ indexAxis:'y', plugins:{legend:{display:false},tooltip:{...CH.base().plugins.tooltip,
         callbacks:{label:c=>` ${U.krw(c.parsed.x)}`}}},
-      scales:{ x:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-                 ticks:{color:'#6C777E',font:{size:10.5},callback:v=>(v/10000).toLocaleString()+'만'}},
-               y:{grid:{display:false},border:{color:'#2A3035'},ticks:{color:'#A7B1B8',font:{size:10.5}}} } })
+      scales:{ x:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+                 ticks:{color:'#7C8891',font:{size:10.5},callback:v=>(v/10000).toLocaleString()+'만'}},
+               y:{grid:{display:false},border:{color:'#D8DEE1'},ticks:{color:'#4E5A61',font:{size:10.5}}} } })
   });
 
   // 전환 효율
@@ -711,17 +1169,54 @@ document.querySelectorAll('#seg-mon button').forEach(b=>{
   b.onclick = ()=>{ document.querySelectorAll('#seg-mon button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); renderMonthly(); };
 });
 document.querySelectorAll('#seg-day button').forEach(b=>{
-  b.onclick = ()=>{ document.querySelectorAll('#seg-day button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); drawDaily(+b.dataset.d); };
+  b.onclick = ()=>{ document.querySelectorAll('#seg-day button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    drawDaily(+b.dataset.d); drawDayProduct(+b.dataset.d); };
 });
-document.getElementById('fx').onchange = e=>{
-  CONFIG.fxUSDKRW = +e.target.value || 1380;
-  renderMonthly(); renderWeekly(); renderChannels();
+document.querySelectorAll('#seg-oday button').forEach(b=>{
+  b.onclick = ()=>{ document.querySelectorAll('#seg-oday button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    drawOwnDaily(+b.dataset.d); drawOwnProd(+b.dataset.d); };
+});
+
+/* 채널 패널 전환 (일간 탭 내부) */
+function showChannel(c){
+  document.querySelectorAll('#seg-ch button').forEach(x=>x.classList.toggle('on', x.dataset.c===c));
+  document.querySelectorAll('.chpane').forEach(x=>x.classList.remove('on'));
+  const p = document.getElementById('ch-'+c);
+  if(p) p.classList.add('on');
+}
+document.querySelectorAll('#seg-ch button').forEach(b=> b.onclick = ()=> showChannel(b.dataset.c));
+
+/* 수동 환율 오버라이드 */
+document.getElementById('fx-in').onchange = e=>{
+  const v = +e.target.value;
+  if(!v || v < 500 || v > 3000) return;
+  CONFIG.fxUSDKRW = v;
+  CONFIG.fxSource = '수동';
+  SIORE.renderFX(document.getElementById('fx'));
+  renderAll();
 };
 
+/* 딥링크: index.html 에서 sales.html#amazon 등으로 진입 */
+function applyHash(){
+  const h = (location.hash||'').replace('#','');
+  const map = { amazon:'amazon', b2b:'b2b', own:'own', group:'group' };
+  if(map[h]){
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('on', x.dataset.t==='day'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.getElementById('t-day').classList.add('on');
+    showChannel(map[h]);
+  }
+}
+window.addEventListener('hashchange', applyHash);
+
 (async ()=>{
-  await SIORE.load();
-  SIORE.renderStatus(document.getElementById('status'));
+  await SIORE.loadFX();                                  // 당일 환율 우선
+  SIORE.renderFX(document.getElementById('fx'));
+  document.getElementById('fx-in').value = CONFIG.fxUSDKRW;
   renderAll();
+  applyHash();
+  await SIORE.load();                                    // 시트 연동 시도
+  SIORE.renderStatus(document.getElementById('status'));
 })();
 </script>
 </body>

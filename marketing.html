@@ -196,16 +196,16 @@ function renderOv(){
     data:{ labels:W.map(w=>w.range),
       datasets:[
         { type:'bar', label:'광고비', data:W.map(w=>+w.spend.toFixed(0)),
-          backgroundColor:'rgba(167,139,250,.6)', borderRadius:5, barPercentage:.6, yAxisID:'y' },
+          backgroundColor:'rgba(124,95,224,.6)', borderRadius:5, barPercentage:.6, yAxisID:'y' },
         { type:'line', label:'ROAS', data:W.map(w=>+(w.rev/w.spend*100).toFixed(0)),
           borderColor:CH.mint, borderWidth:2.4, tension:.35, pointRadius:4, pointBackgroundColor:CH.mint, yAxisID:'y1' },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10.5}},border:{color:'#2A3035'}},
-        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}},
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10.5}},border:{color:'#D8DEE1'}},
+        y:{position:'left',grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}},
         y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
-           ticks:{color:'#2EE6C5',font:{size:10.5},callback:v=>v+'%'}} } })
+           ticks:{color:'#0FB89A',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 
   // 월별
@@ -232,19 +232,19 @@ function drawMain(n){
   ck('c-main', {
     data:{ labels:S.map(r=>r[0].slice(5)),
       datasets:[
-        { type:'bar', label:'광고비', data:S.map(r=>r[1]), backgroundColor:'rgba(167,139,250,.55)',
+        { type:'bar', label:'광고비', data:S.map(r=>r[1]), backgroundColor:'rgba(124,95,224,.55)',
           borderRadius:3, barPercentage:.85, yAxisID:'y', order:3 },
-        { type:'bar', label:'구매 전환값', data:S.map(r=>r[7]), backgroundColor:'rgba(46,230,197,.5)',
+        { type:'bar', label:'구매 전환값', data:S.map(r=>r[7]), backgroundColor:'rgba(15,184,154,.5)',
           borderRadius:3, barPercentage:.85, yAxisID:'y', order:2 },
         { type:'line', label:'ROAS', data:S.map(r=>r[8]), borderColor:CH.gold, borderWidth:2, tension:.35,
           pointRadius:0, yAxisID:'y1', order:1 },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
-        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}},
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:18},border:{color:'#D8DEE1'}},
+        y:{position:'left',grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}},
         y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
-           ticks:{color:'#F6C85F',font:{size:10.5},callback:v=>v+'%'}} } })
+           ticks:{color:'#D9A21B',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 }
 
@@ -288,32 +288,32 @@ function renderEff(){
       datasets:[
         { type:'line', label:'CPC ($)', data:A.map(r=>r[4]), borderColor:CH.red, borderWidth:2, tension:.35, pointRadius:0, yAxisID:'y' },
         { type:'line', label:'CTR (%)', data:A.map(r=>r[5]), borderColor:CH.mint, borderWidth:2, tension:.35, pointRadius:0, yAxisID:'y1',
-          fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#2EE6C5',.14,0) },
+          fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#0FB89A',.14,0) },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
-        y:{position:'left',grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:18},border:{color:'#D8DEE1'}},
+        y:{position:'left',grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
            ticks:{color:'#FF6B6B',font:{size:10.5},callback:v=>'$'+v.toFixed(1)}},
         y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,
-           ticks:{color:'#2EE6C5',font:{size:10.5},callback:v=>v+'%'}} } })
+           ticks:{color:'#0FB89A',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 
   ck('c-scatter', {
     type:'scatter',
     data:{ datasets:[{ label:'일별 (지출 vs ROAS)',
       data:A.map(r=>({x:r[1], y:r[8], d:r[0]})),
-      backgroundColor:A.map(r=> r[8]>=167 ? 'rgba(46,230,197,.75)' : 'rgba(255,107,107,.7)'),
+      backgroundColor:A.map(r=> r[8]>=167 ? 'rgba(15,184,154,.75)' : 'rgba(229,72,77,.7)'),
       pointRadius:5, pointHoverRadius:7 }]},
     options: CH.base({
       plugins:{ legend:{display:false},
         tooltip:{ ...CH.base().plugins.tooltip,
           callbacks:{ label:c=>` ${c.raw.d} · 지출 ${U.usd2(c.raw.x)} · ROAS ${c.raw.y.toFixed(0)}%` } } },
-      scales:{ x:{ title:{display:true,text:'일 지출 ($)',color:'#6C777E',font:{size:10.5}},
-                   grid:{color:'#21262B'}, border:{display:false}, beginAtZero:true,
-                   ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v} },
-               y:{ title:{display:true,text:'ROAS (%)',color:'#6C777E',font:{size:10.5}},
-                   grid:{color:'#21262B'}, border:{display:false}, beginAtZero:true,
-                   ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'%'} } } })
+      scales:{ x:{ title:{display:true,text:'일 지출 ($)',color:'#7C8891',font:{size:10.5}},
+                   grid:{color:'#E6EBED'}, border:{display:false}, beginAtZero:true,
+                   ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+v} },
+               y:{ title:{display:true,text:'ROAS (%)',color:'#7C8891',font:{size:10.5}},
+                   grid:{color:'#E6EBED'}, border:{display:false}, beginAtZero:true,
+                   ticks:{color:'#7C8891',font:{size:10.5},callback:v=>v+'%'} } } })
   });
 
   // 지출 밴드
@@ -361,14 +361,14 @@ function drawBEP(){
     data:{ labels:A.map(r=>r[0].slice(5)),
       datasets:[
         { label:'일별 ROAS', data:A.map(r=>r[8]), borderRadius:3, barPercentage:.85,
-          backgroundColor:A.map(r=> r[8]>=bep ? 'rgba(46,230,197,.7)':'rgba(255,107,107,.75)') },
+          backgroundColor:A.map(r=> r[8]>=bep ? 'rgba(15,184,154,.7)':'rgba(229,72,77,.75)') },
         { type:'line', label:`손익분기 ROAS (${bep.toFixed(0)}%)`, data:A.map(()=>bep),
           borderColor:CH.gold, borderWidth:2, borderDash:[6,4], pointRadius:0 },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
-        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'%'}} } })
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:18},border:{color:'#D8DEE1'}},
+        y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 }
 
@@ -382,9 +382,9 @@ function renderFun(){
     options: CH.base({ indexAxis:'y',
       plugins:{ legend:{display:false},
         tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${U.num(c.parsed.x)}` } } },
-      scales:{ x:{ type:'logarithmic', grid:{color:'#21262B'}, border:{display:false},
-                   ticks:{color:'#6C777E',font:{size:10.5},callback:v=>U.num(v)} },
-               y:{ grid:{display:false}, border:{color:'#2A3035'}, ticks:{color:'#A7B1B8',font:{size:12,weight:'600'}} } } })
+      scales:{ x:{ type:'logarithmic', grid:{color:'#E6EBED'}, border:{display:false},
+                   ticks:{color:'#7C8891',font:{size:10.5},callback:v=>U.num(v)} },
+               y:{ grid:{display:false}, border:{color:'#D8DEE1'}, ticks:{color:'#4E5A61',font:{size:12,weight:'600'}} } } })
   });
 
   const steps = [
@@ -419,9 +419,9 @@ function renderFun(){
           borderColor:CH.mint, borderWidth:2.4, tension:.35, pointRadius:4, pointBackgroundColor:CH.mint },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10.5}},border:{color:'#2A3035'}},
-        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>v+'%'}} } })
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10.5}},border:{color:'#D8DEE1'}},
+        y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 
   // 광고 vs 아마존 실매출
@@ -432,16 +432,16 @@ function renderFun(){
       datasets:[
         { type:'line', label:'아마존 실매출 (USD)', data:days.map(d=>amzMap[d]),
           borderColor:CH.cyan, borderWidth:2.2, tension:.35, pointRadius:0,
-          fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#35D6F0',.18,0) },
+          fill:true, backgroundColor:ctx=>CH.grad(ctx.chart,'#1FA8C9',.18,0) },
         { type:'line', label:'광고 구매전환값 (USD)', data:days.map(d=>{const r=A.find(x=>x[0]===d); return r?r[7]:null;}),
           borderColor:CH.mint, borderWidth:2.2, tension:.35, pointRadius:0 },
         { type:'bar', label:'광고비', data:days.map(d=>{const r=A.find(x=>x[0]===d); return r?r[1]:null;}),
-          backgroundColor:'rgba(167,139,250,.35)', borderRadius:3, barPercentage:.8 },
+          backgroundColor:'rgba(124,95,224,.35)', borderRadius:3, barPercentage:.8 },
       ]},
     options: CH.base({
-      scales:{ x:{grid:{display:false},ticks:{color:'#6C777E',font:{size:10},autoSkipPadding:18},border:{color:'#2A3035'}},
-        y:{grid:{color:'#21262B'},border:{display:false},beginAtZero:true,
-           ticks:{color:'#6C777E',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}} } })
+      scales:{ x:{grid:{display:false},ticks:{color:'#7C8891',font:{size:10},autoSkipPadding:18},border:{color:'#D8DEE1'}},
+        y:{grid:{color:'#E6EBED'},border:{display:false},beginAtZero:true,
+           ticks:{color:'#7C8891',font:{size:10.5},callback:v=>'$'+v.toLocaleString()}} } })
   });
 
   const amzSum = U.sum(days, d=>amzMap[d]);
@@ -477,9 +477,10 @@ document.querySelectorAll('#seg-ov button').forEach(b=>{
 document.getElementById('mgn').oninput = drawBEP;
 
 (async()=>{
+  await SIORE.loadFX();          // 당일 환율 (광고비 원화 환산용)
+  renderOv(); renderEff(); renderFun(); renderRaw();
   await SIORE.load();
   SIORE.renderStatus(document.getElementById('status'));
-  renderOv(); renderEff(); renderFun(); renderRaw();
 })();
 </script>
 </body>
