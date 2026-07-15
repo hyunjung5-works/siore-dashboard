@@ -64,6 +64,11 @@
   <div id="al-list" class="sec"></div>
 
   <div class="sec card">
+    <div class="card-h"><h3>발주 현황 (발주중 · 미입고)</h3><span class="hint">입고예정일까지 D-Day</span></div>
+    <div class="tbl-wrap"><table id="tb-po-inv"></table></div>
+  </div>
+
+  <div class="sec card">
     <div class="card-h"><h3>전체 SKU 소진 예상일</h3>
       <span class="hint">소진예상일 = 가용재고 ÷ 일평균 소진량 · 리드타임 <b id="lt-echo">45</b>일 + 안전버퍼(국내 14 / 아마존 21) 기준</span>
     </div>
@@ -217,25 +222,40 @@ function build(){
   return SNAP.stock.map(([code,name,region,cat,ob,fba,res,sold30])=>{
     const isUS = region==='US';
     const stock = isUS ? fba : ob;
-    let daily = 0, basis = '';
+    let daily = 0, basis = '', short = null, order = null, demand = null;
     if(isUS){
       daily = (sold30||0)/30;
       basis = `최근30일 ${sold30||0}개 ÷ 30`;
     } else {
-      const sk = SHIP_MAP[name];
-      const out = shipTotal[sk] || 0;
-      daily = out / DOM_DAYS;
-      basis = `4~7월 출고 ${out}개 ÷ ${DOM_DAYS}일`;
+      const fc = (typeof DOM_FORECAST!=='undefined') ? DOM_FORECAST.items[name] : null;
+      if(fc){
+        daily = fc.draw/30; demand = fc.demand; short = fc.short; order = fc.order;
+        basis = `월수요(성장) ${fc.demand} + 발송·시딩 → 월 ${fc.draw}개 (재고예측 ${DOM_FORECAST.asOf})`;
+      } else {
+        const out = shipTotal[SHIP_MAP[name]] || 0;
+        daily = out / DOM_DAYS;
+        basis = `4~7월 출고 ${out}개 ÷ ${DOM_DAYS}일`;
+      }
     }
     const runway = daily > 0 ? stock/daily : null;
-    return { code, name, region, cat, stock, reserved: isUS?res:0, sold30, daily, basis, runway, isUS };
+    return { code, name, region, cat, stock, reserved: isUS?res:0, sold30, daily, basis, runway, isUS, short, order, demand };
   });
 }
 const M = build();
 
-function tier(runway, lt, isUS){
+/* 부족 예상월까지 남은 개월 (현재 7월 기준) */
+function monthsUntilShort(short){ if(!short) return null; const n=parseInt(short,10); const cur=new Date().getMonth()+1; return n-cur; }
+
+function tierOf(m, lt){
+  // 국내 · 재고예측 시트에 부족월이 명시된 경우 → 그 신호를 우선
+  if(!m.isUS && m.short){
+    const mu = monthsUntilShort(m.short);
+    if(mu!=null && mu<=2) return {k:'urgent', bdg:'<span class="bdg bdg-bad">🚨 즉시 발주</span>', rank:0};
+    return {k:'watch', bdg:'<span class="bdg bdg-warn">⚠️ 발주 검토</span>', rank:1};
+  }
+  const runway = m.runway;
   if(runway == null) return {k:'none', bdg:'<span class="bdg bdg-mute">소진 없음</span>', rank:3};
-  const th = getReorderThresholds(lt, isUS);
+  const th = getReorderThresholds(lt, m.isUS);
   if(runway <= th.urgent) return {k:'urgent', bdg:'<span class="bdg bdg-bad">🚨 즉시 발주</span>', rank:0};
   if(runway <= th.watch)  return {k:'watch',  bdg:'<span class="bdg bdg-warn">⚠️ 발주 검토</span>', rank:1};
   return {k:'ok', bdg:'<span class="bdg bdg-good">✅ 안전</span>', rank:2};
@@ -245,7 +265,7 @@ function render(){
   const lt = +document.getElementById('lt').value || 45;
   document.getElementById('lt-echo').textContent = lt;
 
-  const rows = M.map(m=>({ ...m, t: tier(m.runway, lt, m.isUS) }));
+  const rows = M.map(m=>({ ...m, t: tierOf(m, lt) }));
   const urg = rows.filter(r=>r.t.k==='urgent'), wat = rows.filter(r=>r.t.k==='watch');
   const ok  = rows.filter(r=>r.t.k==='ok');
   const domTh = getReorderThresholds(lt, false);
@@ -274,15 +294,16 @@ function render(){
         <b>${title} — ${list.length}개 SKU</b><br>
         <span style="color:var(--tx-3);font-size:11.5px">${msg}</span>
         <div style="margin-top:10px;display:grid;gap:7px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
-        ${list.sort((a,b)=>a.runway-b.runway).map(r=>`
+        ${list.slice().sort((a,b)=>(a.short?0:1)-(b.short?0:1) || (a.runway??1e9)-(b.runway??1e9)).map(r=>`
           <div style="background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;display:flex;justify-content:space-between;gap:8px;align-items:center">
             <div style="min-width:0">
               <div style="font-size:12px;font-weight:650;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name}</div>
-              <div style="font-size:10.5px;color:var(--tx-3)">재고 ${U.num(r.stock)} · 일평균 ${r.daily.toFixed(1)}</div>
+              <div style="font-size:10.5px;color:var(--tx-3)">재고 ${U.num(r.stock)} · ${r.demand!=null?'월수요 '+U.num(r.demand):'일평균 '+r.daily.toFixed(1)}</div>
             </div>
             <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:16px;font-weight:750;color:${r.t.k==='urgent'?'var(--bad)':'var(--warn)'};font-variant-numeric:tabular-nums">${Math.round(r.runway)}일</div>
-              <div style="font-size:10px;color:var(--tx-3)">소진 예상</div>
+              ${r.short
+                ? `<div style="font-size:15px;font-weight:800;color:${r.t.k==='urgent'?'var(--bad)':'var(--warn)'}">${r.short} 부족</div><div style="font-size:10px;color:var(--tx-3)">발주필요 ${U.num(r.order)}개</div>`
+                : `<div style="font-size:16px;font-weight:750;color:${r.t.k==='urgent'?'var(--bad)':'var(--warn)'};font-variant-numeric:tabular-nums">${r.runway!=null?Math.round(r.runway)+'일':'—'}</div><div style="font-size:10px;color:var(--tx-3)">소진 예상</div>`}
             </div>
           </div>`).join('')}
         </div>
@@ -368,22 +389,19 @@ function renderDom(lt){
         tooltip:{ ...CH.base().plugins.tooltip, callbacks:{ label:c=>` ${c.label}: ${U.num(c.parsed)}개 (${(c.parsed/U.sum(Object.values(cats))*100).toFixed(1)}%)` } } } })
   });
 
-  const rrp = SNAP.shipProductMonth.rrpUnitsPerBox;
   document.getElementById('tb-dom').innerHTML =
-    `<thead><tr><th>품목명</th><th>카테고리</th><th>가용재고</th><th>4~7월 출고</th><th>일평균</th><th>소진 예상</th><th>환산 단품</th><th>상태</th></tr></thead><tbody>
-    ${[...D].sort((a,b)=>(a.runway??1e9)-(b.runway??1e9)).map(m=>{
-      const sk = SHIP_MAP[m.name];
-      const per = Object.entries(rrp).find(([k])=>k===sk)?.[1];
-      const t = tier(m.runway, lt, false);
+    `<thead><tr><th>품목명</th><th>카테고리</th><th>가용재고</th><th>월수요</th><th>소진(개월)</th><th>부족예상월</th><th>발주필요</th><th>상태</th></tr></thead><tbody>
+    ${[...D].sort((a,b)=>{ const ra=a.short?0:1, rb=b.short?0:1; return ra-rb || (a.runway??1e9)-(b.runway??1e9); }).map(m=>{
+      const t = tierOf(m, lt);
+      const runM = m.daily>0 ? (m.stock/m.daily/30) : null;
       return `<tr><td>${m.name}</td><td>${m.cat}</td><td>${U.num(m.stock)}</td>
-        <td>${U.num(shipTotal[sk]||0)}</td><td>${m.daily.toFixed(2)}</td>
-        <td><b style="color:${t.k==='urgent'?'var(--bad)':(t.k==='watch'?'var(--warn)':'var(--tx-2)')}">${m.runway?Math.round(m.runway)+'일':'—'}</b></td>
-        <td>${per? U.num(m.stock*per)+'개 ('+per+'입)' : '—'}</td>
+        <td>${m.demand!=null?U.num(m.demand)+'개':(m.daily?Math.round(m.daily*30)+'개':'—')}</td>
+        <td>${runM!=null?runM.toFixed(1)+'개월':'—'}</td>
+        <td>${m.short?`<b style="color:${t.k==='urgent'?'var(--bad)':'var(--warn)'}">${m.short}</b>`:'<span style="color:var(--tx-3)">여유</span>'}</td>
+        <td>${m.order?`<b>${U.num(m.order)}</b>개`:'—'}</td>
         <td style="text-align:left">${t.bdg}</td></tr>`;
     }).join('')}
-    <tr class="total"><td>합계</td><td></td><td>${U.num(U.sum(D,m=>m.stock))}</td>
-      <td>${U.num(U.sum(Object.values(shipTotal)))}</td><td>${U.sum(D,m=>m.daily).toFixed(2)}</td>
-      <td colspan="3"></td></tr></tbody>`;
+    <tr class="total"><td>합계</td><td></td><td>${U.num(U.sum(D,m=>m.stock))}</td><td colspan="5"></td></tr></tbody>`;
 }
 
 /* ---------- 아마존 ---------- */
@@ -430,7 +448,7 @@ function renderUS(lt){
   document.getElementById('tb-us').innerHTML =
     `<thead><tr><th>품목명</th><th>카테고리</th><th>FBA 가용</th><th>예약중</th><th>30일 판매</th><th>일평균</th><th>소진 예상</th><th>상태</th></tr></thead><tbody>
     ${[...US].sort((a,b)=>(a.runway??1e9)-(b.runway??1e9)).map(m=>{
-      const t = tier(m.runway, lt, true);
+      const t = tierOf(m, lt);
       return `<tr><td>${m.name.replace('[US] ','')}</td><td>${m.cat}</td>
         <td>${U.num(m.stock)}</td><td>${U.num(m.reserved)}</td><td>${U.num(m.sold30||0)}</td>
         <td>${m.daily?m.daily.toFixed(2):'0'}</td>
@@ -499,6 +517,23 @@ function renderFlow(){
       <td>${U.num(U.sum(Object.values(shipTotal)))}</td><td></td></tr></tbody>`;
 }
 
+/* ---------- 발주 현황 ---------- */
+function renderPO(){
+  const today = new Date(SNAP.stockAsOf.ourbox);
+  document.getElementById('tb-po-inv').innerHTML =
+    `<thead><tr><th>제품명</th><th>수량</th><th>발주일</th><th>입고예정일</th><th>D-Day</th><th>상태</th></tr></thead><tbody>
+    ${SNAP.purchaseOrders.map(([n,q,od,eta])=>{
+      const d = Math.round((new Date(eta)-today)/86400000);
+      const late = d < 0;
+      return `<tr><td>${n}</td><td>${U.num(q)}</td><td>${od}</td><td>${eta}</td>
+        <td><b style="color:${late?'var(--bad)':(d<=14?'var(--warn)':'var(--tx-2)')}">${late?`+${-d}일 지연`:`D-${d}`}</b></td>
+        <td style="text-align:left">${late?'<span class="bdg bdg-bad">입고 지연</span>'
+          :(d<=14?'<span class="bdg bdg-warn">임박</span>':'<span class="bdg bdg-info">발주중</span>')}</td></tr>`;
+    }).join('')}
+    <tr class="total"><td>합계 (발주중)</td><td>${U.num(U.sum(SNAP.purchaseOrders,p=>p[1]))}</td><td colspan="4"></td></tr>
+    </tbody>`;
+}
+
 /* ---------- 부트 ---------- */
 document.querySelectorAll('.nav button').forEach(b=>{
   b.onclick=()=>{ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('on'));
@@ -510,7 +545,7 @@ document.getElementById('lt').onchange = render;
 (async()=>{
   await SIORE.load();
   SIORE.renderStatus(document.getElementById('status'));
-  render(); renderFlow();
+  render(); renderFlow(); renderPO();
 })();
 </script>
 </body>

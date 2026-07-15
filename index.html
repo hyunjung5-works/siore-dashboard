@@ -296,11 +296,19 @@ const SHIP_MAP = {
 const shipTotal={}; S.shipProductMonth.rows.forEach(([n,v])=> shipTotal[n]=U.sum(v));
 const STOCK = S.stock.map(([c,n,rg,cat,ob,fba,res,s30,idle])=>{
   const isUS = rg==='US', st = isUS?fba:ob;
-  const daily = isUS ? (s30||0)/30 : (shipTotal[SHIP_MAP[n]]||0)/DOM_DAYS;
+  let daily, short=null, order=null, demand=null;
+  if(isUS){ daily = (s30||0)/30; }
+  else {
+    const fc = (typeof DOM_FORECAST!=='undefined') ? DOM_FORECAST.items[n] : null;
+    if(fc){ daily = fc.draw/30; short=fc.short; order=fc.order; demand=fc.demand; }
+    else daily = (shipTotal[SHIP_MAP[n]]||0)/DOM_DAYS;
+  }
   const th = isUS?TH_US:TH_DOM;
   const runway = daily>0 ? st/daily : null;
-  return { code:c, n, cat, isUS, st, res, s30, idle:idle||0, daily, runway, th,
-           tier: runway==null ? 'none' : (runway<=th ? 'urgent' : (runway<=th+14 ? 'watch' : 'ok')) };
+  let tier;
+  if(!isUS && short){ const mu = parseInt(short,10)-(new Date().getMonth()+1); tier = mu<=2?'urgent':'watch'; }
+  else tier = runway==null ? 'none' : (runway<=th ? 'urgent' : (runway<=th+14 ? 'watch' : 'ok'));
+  return { code:c, n, cat, isUS, st, res, s30, idle:idle||0, daily, runway, th, short, order, demand, tier };
 });
 const URG = STOCK.filter(s=>s.tier==='urgent'), WAT = STOCK.filter(s=>s.tier==='watch');
 
@@ -546,11 +554,12 @@ function renderInventory(){
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
               <div style="min-width:0">
                 <div style="font-size:12px;font-weight:700;color:var(--tx)">${s.n}</div>
-                <div style="font-size:10.5px;color:var(--tx-3)">재고 ${U.num(s.st)} · 일평균 ${s.daily.toFixed(1)}</div>
+                <div style="font-size:10.5px;color:var(--tx-3)">재고 ${U.num(s.st)} · ${s.demand!=null?'월수요 '+U.num(s.demand):'일평균 '+s.daily.toFixed(1)}</div>
               </div>
               <div style="text-align:right;flex-shrink:0">
-                <div style="font-size:17px;font-weight:780;color:var(--bad)">${Math.round(s.runway)}일</div>
-                <div style="font-size:10px;color:var(--tx-3)">소진 예상</div>
+                ${s.short
+                  ? `<div style="font-size:16px;font-weight:800;color:var(--bad)">${s.short} 부족</div><div style="font-size:10px;color:var(--tx-3)">발주필요 ${U.num(s.order)}개</div>`
+                  : `<div style="font-size:17px;font-weight:780;color:var(--bad)">${s.runway!=null?Math.round(s.runway)+'일':'—'}</div><div style="font-size:10px;color:var(--tx-3)">소진 예상</div>`}
               </div>
             </div>
             ${po ? `<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:10.5px;color:var(--tx-2)">
@@ -579,16 +588,22 @@ function renderInventory(){
     <tr class="total"><td>합계 (발주중)</td><td>${U.num(U.sum(S.purchaseOrders,p=>p[1]))}</td><td colspan="4"></td></tr>
     </tbody>`;
 
-  /* 발주 필요 알람 */
-  const need = S.reorderNeed;
+  /* 발주 필요 알람 — 재고예측(부족월) 기준 */
+  const needItems = STOCK.filter(s=>!s.isUS && s.short).sort((a,b)=>parseInt(a.short,10)-parseInt(b.short,10));
   g('po-need').innerHTML = `
     <div class="tbl-wrap"><table>
-      <thead><tr><th>품목</th><th>발주필요(H2예측)</th><th>발주중</th><th>순발주필요</th></tr></thead>
-      <tbody>${need.map(([n,a,b,c])=>`<tr><td>${n}</td><td>${U.num(a)}</td><td>${U.num(b)}</td>
-        <td><b style="color:${c>0?'var(--bad)':'var(--good)'}">${c>0?U.num(c):'0 (충족)'}</b></td></tr>`).join('')}
+      <thead><tr><th>품목</th><th>부족예상</th><th>발주필요(H2)</th><th>발주중</th><th>순발주필요</th></tr></thead>
+      <tbody>${needItems.map(s=>{
+        const oo = onOrder[s.n.replace('[US] ','')]||0;
+        const net = Math.max(0, (s.order||0) - oo);
+        return `<tr><td>${s.n}</td><td><b style="color:${parseInt(s.short,10)-(new Date().getMonth()+1)<=2?'var(--bad)':'var(--warn)'}">${s.short}</b></td>
+          <td>${U.num(s.order)}</td><td>${U.num(oo)}</td>
+          <td><b style="color:${net>0?'var(--bad)':'var(--good)'}">${net>0?U.num(net):'0 (충족)'}</b></td></tr>`;
+      }).join('')}
+      ${needItems.length?'':'<tr><td colspan="5" style="text-align:center;color:var(--tx-3)">부족 예상 품목 없음</td></tr>'}
       </tbody></table></div>
     ${WAT.length ? `<div class="alert warn" style="margin:12px 0 0"><span class="ico">⚠️</span>
-      <div><b>발주 검토 ${WAT.length}개</b> — ${WAT.map(s=>`${s.n} (${Math.round(s.runway)}일)`).join(', ')}</div></div>` : ''}
+      <div><b>발주 검토 ${WAT.length}개</b> — ${WAT.map(s=>`${s.n} (${s.short?s.short+' 부족':Math.round(s.runway)+'일'})`).join(', ')}</div></div>` : ''}
     ${!URG.length && !WAT.length ? `<div class="alert info" style="margin:12px 0 0"><span class="ico">✅</span>
       <div>현재 기준 발주 위험 SKU 없음.</div></div>` : ''}`;
 
@@ -601,7 +616,7 @@ function renderInventory(){
       const c = s.tier==='urgent'?'var(--bad)':(s.tier==='watch'?'var(--warn)':'var(--tx-2)');
       return `<tr><td>${s.n}</td><td><b style="color:var(--tx)">${U.num(s.st)}</b></td>
         <td>${s.idle?U.num(s.idle):'—'}</td><td>${s.daily.toFixed(1)}</td>
-        <td><b style="color:${c}">${s.runway?Math.round(s.runway)+'일':'—'}</b></td>
+        <td><b style="color:${c}">${s.short?s.short+' 부족':(s.runway?Math.round(s.runway)+'일':'—')}</b></td>
         <td>${po?U.num(po):'—'}</td>
         <td style="text-align:left">${s.tier==='urgent'?'<span class="bdg bdg-bad">🚨 즉시</span>'
           :(s.tier==='watch'?'<span class="bdg bdg-warn">⚠️ 검토</span>':'<span class="bdg bdg-good">✅ 안전</span>')}</td></tr>`;
@@ -631,10 +646,12 @@ function renderSignals(CH, totYtd, totWk, totPw, FX){
   const po = S.purchaseOrders.find(p=>p[0]==='NMN 인텐시브 세럼');
   const gapDays = Math.round((new Date(po[3]) - new Date(S.stockAsOf.amazon))/86400000) - Math.round(serum.runway);
 
-  const spend = U.sum(S.adsChannels, x=>x[3]);
-  const adRev = U.sum(S.adsChannels, x=>x[7]);
-  const roas  = adRev/spend*100;
-  const meta  = S.adsChannels.find(x=>x[0]==='Meta');
+  const spRoas = S.adsChannels[0][7]/S.adsChannels[0][3]*100;   // 아마존 PPC (리포트 ver.5)
+  const md = S.adsDaily||[];
+  const metaSpend = U.sum(md,r=>r[1]), metaRev = U.sum(md,r=>r[7]);
+  const metaRoas = metaSpend ? metaRev/metaSpend*100 : 0;
+  const metaAcos = metaRev ? metaSpend/metaRev*100 : 0;
+  const inf = influencerStats();
 
   const dWk = U.delta(totWk, totPw);
 
@@ -644,12 +661,13 @@ function renderSignals(CH, totYtd, totWk, totPw, FX){
       d:`아마존 매출의 <b>67%</b>를 만드는 <b>NMN 인텐시브 세럼</b>의 FBA 재고가 <b>${U.num(serum.st)}개</b>, 30일 판매 ${U.num(serum.s30)}개 기준 <b>${Math.round(serum.runway)}일치</b>뿐입니다.
          30,000개 발주는 걸려 있으나 입고예정일이 <b>${po[3]}</b> — <b class="dn">약 ${gapDays}일의 품절 공백</b>이 발생합니다.`,
       a:`국내 아워박스 재고(${U.num(STOCK.find(s=>s.n==='NMN 인텐시브 세럼').st)}개 + 발송대기 ${U.num(STOCK.find(s=>s.n==='NMN 인텐시브 세럼').idle)}개)에서 <b>항공 특송으로 긴급 FBA 보충</b>하세요. 이번 주 결정 사항입니다.` },
-    { ico:'💸', tone: roas<167?'bad':'warn',
-      t:`통합 ROAS ${roas.toFixed(0)}% — 손익분기(167%) 미달`,
-      d:`광고비 <b>${U.usd2(spend)}</b>를 태워 광고 귀속 매출 <b>${U.usd2(adRev)}</b>. 특히 <b>Meta는 ROAS ${(meta[7]/meta[3]*100).toFixed(1)}%</b>로 사실상 전액 손실입니다
-         (클릭 ${U.num(meta[2])}회 → 구매 ${meta[6]}건, CVR ${(meta[6]/meta[2]*100).toFixed(2)}%).
-         반면 아마존 PPC는 ${(S.adsChannels[0][7]/S.adsChannels[0][3]*100).toFixed(0)}%.`,
-      a:`Meta 예산을 <b>즉시 중단 또는 90% 감액</b>하고 아마존 PPC로 재배분하세요. Meta는 랜딩(아마존 상세페이지) 전환이 안 되는 구조입니다 — 소재가 아니라 <b>퍼널 설계</b> 문제입니다.` },
+    { ico:'📣', tone: metaRoas>=250?'good':'warn',
+      t:`마케팅 효율 — Meta ROAS ${metaRoas.toFixed(0)}% · 인플루언서 ER ${inf.avgER.toFixed(1)}%`,
+      d:`검증된 채널이 뚜렷합니다. <b>Meta 광고 ROAS ${metaRoas.toFixed(0)}%</b>(ACOS ${metaAcos.toFixed(0)}%)로 효율 양호,
+         <b>인플루언서 22건 평균 ER ${inf.avgER.toFixed(1)}%</b>(업계 1~3% 상회)로 브랜드 확산이 살아있습니다.
+         상대적으로 <b>아마존 PPC는 ROAS ${spRoas.toFixed(0)}%</b>로 키워드·입찰 최적화 여지가 있습니다.`,
+      a:`효율이 검증된 <b>Meta·인플루언서에 하반기 증액 예산</b>(마케팅 ${U.krwM(AMZ_PLAN.totalAdKRW)}원)을 우선 배분하고,
+         아마존 PPC는 저효율 키워드 정리 후 ROAS 150%+ 회복 시 증액하세요.` },
     { ico: dWk.v>=0?'📈':'📉', tone: dWk.v>=0?'good':'bad',
       t:`주간 매출 ${U.krwM(totWk)}원 · 전주 대비 ${dWk.tx}`,
       d:`아마존 ${U.krwM(CH.amazon.wk)} · 자사몰 ${U.krwM(CH.own.wk)} · B2B ${U.krwM(CH.b2b.wk)}.
@@ -690,7 +708,11 @@ function renderSrc(live){
         <td style="text-align:left">${ok?'<span class="bdg bdg-good">● 실시간</span>'
           :'<span class="bdg bdg-warn">◐ 스냅샷 (시트 웹 게시 필요)</span>'}</td></tr>`;
     }).join('')}
-    <tr><td>아마존 마케팅 리포트 ver.5</td><td>매체별·상품별 광고</td><td>—</td>
+    <tr><td><a href="https://docs.google.com/spreadsheets/d/1kV4E0cReNHHuds2t87ZgZOZbr-R-09Dul9BCmqRMM2I/edit" target="_blank" style="color:var(--cyan-2);text-decoration:none">아마존 마케팅 리포트 ver.5 ↗</a></td><td>매체별·상품별 광고 · 인플루언서</td><td>—</td>
+      <td style="text-align:left"><span class="bdg bdg-warn">◐ 스냅샷</span></td></tr>
+    <tr><td><a href="https://docs.google.com/spreadsheets/d/1bqybDzpE4dobP7e0IMsLl7fTiBQFFFlGdcepDqaLp-w/edit#gid=1895890233" target="_blank" style="color:var(--cyan-2);text-decoration:none">시오레 매출목표 (연간계획) ↗</a></td><td>아마존 목표·마케팅 예산·시딩계획</td><td>${AMZ_PLAN.asOf}</td>
+      <td style="text-align:left"><span class="bdg bdg-warn">◐ 스냅샷</span></td></tr>
+    <tr><td><a href="https://docs.google.com/spreadsheets/d/1LCuWeWi8kBJLhl9xyPQW6VQaxDB5TQ2NgQvjsSRE9Yk/edit#gid=435206418" target="_blank" style="color:var(--cyan-2);text-decoration:none">재고·발주관리 (재고예측) ↗</a></td><td>현재고·국내 재고예측·발주</td><td>${DOM_FORECAST.asOf}</td>
       <td style="text-align:left"><span class="bdg bdg-warn">◐ 스냅샷</span></td></tr>
     <tr><td>국내공구 (약사님)</td><td>미정</td><td>—</td>
       <td style="text-align:left"><span class="bdg bdg-mute">○ 미연결</span></td></tr>

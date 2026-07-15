@@ -38,20 +38,20 @@
 
 <nav class="nav">
   <div class="nav-in">
-    <button class="on" data-t="year">📆 연간</button>
-    <button data-t="mon">📅 월간</button>
-    <button data-t="wk">🗓️ 주간</button>
+    <button class="on" data-t="goal">🎯 아마존 목표</button>
     <button data-t="day">📈 일간</button>
+    <button data-t="wk">🗓️ 주간</button>
+    <button data-t="mon">📅 월간</button>
+    <button data-t="year">📆 연간</button>
     <button data-t="ch">🏬 유통처 상세</button>
     <button data-t="prod">🧴 제품별</button>
-    <button data-t="goal">🎯 아마존 목표</button>
   </div>
 </nav>
 
 <div class="wrap">
 
 <!-- ============ 연간 ============ -->
-<div class="tab on" id="t-year">
+<div class="tab" id="t-year">
   <div class="sec">
     <div class="sec-h"><h2>2026 연간 통합 실적</h2><span class="note" id="yr-note"></span></div>
     <div class="kpis">
@@ -474,13 +474,13 @@
 </div>
 
 <!-- ============ 아마존 목표 ============ -->
-<div class="tab" id="t-goal">
+<div class="tab on" id="t-goal">
   <div class="sec">
     <div class="sec-h"><h2>🎯 아마존 US · 목표 대비 도달률</h2><span class="note" id="g-note"></span></div>
     <div class="alert info" style="margin-bottom:16px"><span class="ico">🎯</span>
-      <div><b>목표</b>는 <span class="mono">시오레_매출목표_raw</span> 시트(연간계획)를,
-      <b>실적</b>은 대시보드의 <b>아마존 일자별 실측</b>을 실시간 반영합니다.
-      도달률 = 실적 ÷ 목표. (시트 계획 환율 <b id="g-fxplan">—</b>원 · 현재 적용 환율 <b id="g-fxnow">—</b>원)</div>
+      <div><b>목표·실적 모두</b> <span class="mono">시오레_매출목표_raw</span> 시트 <b>[1.아마존_연간목표]</b> 공식 집계 기준입니다.
+      도달률 = 월 도달 매출 ÷ 월 매출 목표. 일별 실측 매출은 <b>일간·월간·연간 탭</b>에서 확인하세요.
+      (계획 환율 <b id="g-fxplan">—</b>원)</div>
     </div>
     <div class="gauge-wrap">
       <div class="gauge"><div class="gl">이번 달 도달률 <span id="g-cur-m"></span></div><div class="gv" id="g-cur">—</div><div class="gs" id="g-cur-s">—</div><div class="gbar"><i id="g-cur-bar" style="width:0"></i></div></div>
@@ -1514,16 +1514,14 @@ function renderYear(){
 function reachClass(p){ return p>=90?'hi':(p>=60?'mid':'lo'); }
 function renderAmzGoal(){
   const FX = CONFIG.fxUSDKRW;
-  const A = amazonByMonth();                     // {'2026-03':{usd..}}
   const P = AMZ_PLAN;
   const curIdx = new Date().getMonth();          // 6 = 7월
   const MN = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
-  // 월별 실적(원)·목표(원)·도달률
+  // 월별 실적(원)·목표(원)·도달률 — 실적은 시트 공식 집계(월 도달) 기준
   const rows = P.revTargetKRW.map((tgt,i)=>{
-    const key = `2026-${String(i+1).padStart(2,'0')}`;
-    const actUSD = A[key]?.usd || 0;
-    const actKRW = actUSD * FX;
+    const actKRW = P.achievedKRW[i] || 0;
+    const actUSD = P.achievedUSD[i] || 0;
     const reach = tgt>0 ? actKRW/tgt*100 : null;
     return { i, mn:MN[i], tgt, actUSD, actKRW, reach, ad:P.adBudgetKRW[i],
              adRatio: tgt>0 ? P.adBudgetKRW[i]/tgt*100 : null };
@@ -1544,12 +1542,10 @@ function renderAmzGoal(){
   };
   document.getElementById('g-cur-m').textContent = '('+cur.mn+')';
   document.getElementById('g-fxplan').textContent = P.fxPlan.toLocaleString('ko-KR');
-  document.getElementById('g-fxnow').textContent  = FX.toLocaleString('ko-KR');
-  document.getElementById('g-note').innerHTML = `계획 시트 · ${P.asOf} · 목표 ${U.krwM(P.totalRevKRW)}원`;
+  document.getElementById('g-note').innerHTML = `시트 공식 집계 · ${P.asOf} · 연 목표 ${U.krwM(P.totalRevKRW)}원`;
 
-  const now = new Date(), dim = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
   setG('g-cur', cur.reach,
-    `목표 ${U.krwM(cur.tgt)} · 실적 ${U.krwM(cur.actKRW)} (${U.usd(cur.actUSD)}) · <span style="color:var(--tx-3)">${now.getMonth()+1}월 ${now.getDate()}/${dim}일 경과 (월 중)</span>`, cur.reach);
+    `목표 ${U.krwM(cur.tgt)} · 실적 ${U.krwM(cur.actKRW)} (${U.usd(cur.actUSD)}) · <span style="color:var(--tx-3)">월 중 진행</span>`, cur.reach);
   setG('g-ytd', ytdReach,
     `현재까지 계획 ${U.krwM(ytdTgt)} · 실적 ${U.krwM(ytdAct)}`, ytdReach);
 

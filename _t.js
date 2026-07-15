@@ -14,27 +14,38 @@ function boot(file){
 }
 const t=(d,id)=>{const e=d.getElementById(id);return e?e.textContent.trim().replace(/\s+/g,' '):'(MISS '+id+')';};
 
-// ---- marketing.html ----
+// ---- sales.html goal ----
 {
-  const {w,d,errors}=boot('marketing.html');
-  try{ w.renderInf(); }catch(e){errors.push('renderInf:'+e.stack);}
-  console.log('== marketing 인플루언서 ==');
-  console.log('건수:',t(d,'if-cnt'),'| 비용:',t(d,'if-cost'),'| 뷰:',t(d,'if-views'),'| ER:',t(d,'if-er'),'| CPV:',t(d,'if-cpv'));
-  console.log('inf 표 rows:',d.querySelectorAll('#tb-if-inf tbody tr').length,'| seed rows:',d.querySelectorAll('#tb-seed tbody tr').length);
-  console.log('seed-cmp len:',d.getElementById('seed-cmp').innerHTML.length>50);
+  const {w,d,errors}=boot('sales.html');
+  try{ w.renderAll(); }catch(e){errors.push('renderAll:'+e.stack);}
+  console.log('== sales 아마존 목표 ==');
+  console.log('default tab:', d.querySelector('.nav button.on')?.textContent.trim(), '| on tab id:', d.querySelector('.tab.on')?.id);
+  console.log('g-cur:',t(d,'g-cur'),'| g-ytd:',t(d,'g-ytd'),'| g-year:',t(d,'g-year'));
+  const goalRows=[...d.querySelectorAll('#tb-goal tbody tr')].slice(2,7).map(tr=>[...tr.children].map(td=>td.textContent.trim()).join(' / '));
+  goalRows.forEach(x=>console.log('  ',x));
+  console.log('ERRORS:',errors.length?errors.join('\n'):'NONE');
+}
+// ---- inventory.html ----
+{
+  const {w,d,errors}=boot('inventory.html');
+  try{ w.render(); w.renderDom&&w.renderDom(45); }catch(e){errors.push('render:'+e.stack);}
+  console.log('\n== inventory ==');
+  console.log('k-urg:',t(d,'k-urg'),'| urg names:',t(d,'k-urg-s'));
+  // find serum row in tb-dom
+  const domRows=[...d.querySelectorAll('#tb-dom tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent.trim()).join(' | '));
+  domRows.filter(r=>/세럼|리치/.test(r)).forEach(x=>console.log('  ',x));
   console.log('ERRORS:',errors.length?errors.join('\n'):'NONE');
 }
 // ---- index.html ----
 {
   const {w,d,errors}=boot('index.html');
   try{ w.renderAll(); }catch(e){errors.push('renderAll:'+e.stack);}
-  console.log('\n== index 02 마케팅 ==');
-  console.log('paid-per:',t(d,'paid-per'));
-  console.log('traffic-per:',t(d,'traffic-per'));
-  console.log('inf-per:',t(d,'inf-per'));
-  console.log('mk-inf rows:',d.querySelectorAll('#mk-inf .mkrow').length);
-  console.log('mk-inf text:',t(d,'mk-inf').slice(0,200));
-  const smallRed=[...d.querySelectorAll('#mk-paid .v small')].length;
-  console.log('mk-paid small count:',smallRed);
+  console.log('\n== index ==');
+  const dom=[...d.querySelectorAll('#tb-dom tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent.trim()).join(' | '));
+  dom.filter(r=>/세럼|리치/.test(r)).forEach(x=>console.log('  dom:',x));
+  const need=[...d.querySelectorAll('#po-need tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent.trim()).join(' | '));
+  need.forEach(x=>console.log('  need:',x));
+  console.log('signal#2:',[...d.querySelectorAll('#signals h3')][1]?.textContent.trim());
+  console.log('src links:',[...d.querySelectorAll('#tb-src a')].map(a=>a.textContent.trim()).join(' | '));
   console.log('ERRORS:',errors.length?errors.join('\n'):'NONE');
 }
