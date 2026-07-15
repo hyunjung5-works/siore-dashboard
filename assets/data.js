@@ -54,6 +54,94 @@ const AMZ_PLAN = {
 };
 
 /* ==========================================================
+   인플루언서 운영 결과 + 하반기 시딩 계획
+   - 광고데이터 시트 [인플루언서 현황] 탭 스냅샷
+   - 시딩 계획: 매출목표 시트 [4.마케팅시딩계획] 탭
+   - 고정/수기 데이터 → snapshot.js(자동갱신) 아닌 여기 보관
+   행: [월, 인플루언서, 인종, 콘텐츠유형, 팔로워, 비용USD, 제품, 뷰, 좋아요, ER%]
+   ER/뷰가 null = 콘텐츠 결과 집계 전 (진행중)
+   ========================================================== */
+const INFLUENCER = {
+  asOf: '2026-07 기준',
+  note: '7월 5건은 콘텐츠 결과 집계 전(진행중)',
+  rows: [
+    ['11월','mirela.nova','백인','논토킹',38400,1288.95,'버블토너',null,871,0.6],
+    ['12월','what_is_lada','백인','논토킹',146500,1288.95,'버블토너',null,null,0.2],
+    ['12월','what_is_lada','백인','논토킹',146500,1288.95,'버블토너',null,null,2.2],
+    ['12월','mirela.nova','백인','토킹',38400,1288.95,'버블토너',null,669,1.2],
+    ['12월','itsalyssadaily','동양인','논토킹',105100,1288.95,'버블토너',null,null,16.9],
+    ['2월','itsalyssadaily','동양인','논토킹',105100,1288.95,'버블토너',null,null,13.0],
+    ['5월','mayaya.kimmm','동양인','토킹',1377700,5000,'인텐시브 세럼',13400,428,3.8],
+    ['5월','natalia bbos','백인','토킹',null,4430,null,0,0,0.0],
+    ['5월','what_is_lada','백인','논토킹',146500,2500,'버블토너',16500,621,4.2],
+    ['5월','heylina2484','동양인','논토킹',177300,3000,'버블토너',6800,247,4.0],
+    ['5월','mayaya.kimmm','동양인','토킹',1377700,0,'인텐시브 세럼',23000,495,2.6],
+    ['6월','natalia','백인','토킹',217200,0,'인텐시브 세럼',13700,442,6.0],
+    ['6월','mora','동양인','토킹',20600,2500,'인텐시브 세럼',2290,119,7.6],
+    ['6월','oreoleo','동양인','N선',9331,400,'인텐시브 세럼',18800,445,3.9],
+    ['6월','miki','흑인','토킹',14400,600,'인텐시브 세럼',10300,422,8.3],
+    ['6월','sunny','동양인','토킹',429100,7000,'인텐시브 세럼',15500,648,5.7],
+    ['6월','ellija','백인','N선',84000,3000,'인텐시브 세럼',3941,165,5.6],
+    ['7월','oreoleo','동양인','N선',25100,400,'인텐시브 세럼',null,null,null],
+    ['7월','Hudson Son','동양인','토킹',287700,4000,'인텐시브 세럼',null,null,null],
+    ['7월','itsalyssadaily','동양인','토킹',105100,5500,'인텐시브 세럼',null,null,null],
+    ['7월','trixjoyalcanar','동양인','토킹',238500,3000,'인텐시브 세럼',null,null,null],
+    ['7월','Brenda Chan','동양인','토킹',208800,5000,'인텐시브 세럼',null,null,null],
+  ],
+  // 하반기(7~12월) 시딩 계획 — [업체, 유형, 예산(원), 수량]
+  seeding: {
+    asOf: '2026 하반기(7~12월) 계획',
+    budgetKRW: 307000000,
+    qty: 6072,
+    vendors: [
+      ['코이',    '무가 시딩', 172000000, 4800],
+      ['지퓨처스', '체험단',    75000000,  500],
+      ['지퓨처스', '리뷰',      60000000,  500],
+      ['내부',    '유가',       0,         272],
+    ],
+  },
+};
+
+/* 인플루언서 집계 (월순: 1~12월, 실제 데이터 순서 기준) */
+function influencerStats(){
+  const R = INFLUENCER.rows;
+  const done = R.filter(r=>r[9]!=null);               // 결과 집계 완료
+  const pending = R.filter(r=>r[9]==null);            // 진행중(7월)
+  const sum = (a,f)=>a.reduce((s,r)=>s+(f(r)||0),0);
+  const totCost = sum(R, r=>r[5]);
+  const doneCost = sum(done, r=>r[5]);
+  const totViews = sum(R, r=>r[7]);
+  const totLikes = sum(R, r=>r[8]);
+  const avgER = done.length ? sum(done,r=>r[9])/done.length : 0;
+  // 월별
+  const monthsOrder = ['11월','12월','2월','5월','6월','7월'];
+  const byMonth = monthsOrder.map(mo=>{
+    const rr = R.filter(r=>r[0]===mo);
+    const dd = rr.filter(r=>r[9]!=null);
+    return { mo, cnt:rr.length, cost:sum(rr,r=>r[5]), views:sum(rr,r=>r[7]),
+             er: dd.length? sum(dd,r=>r[9])/dd.length : null, pending: rr.some(r=>r[9]==null) };
+  }).filter(x=>x.cnt>0);
+  // 인플루언서별 (비용순)
+  const byInfMap = {};
+  R.forEach(r=>{ const k=r[1]; (byInfMap[k]=byInfMap[k]||{n:k,cnt:0,cost:0,views:0,erSum:0,erN:0,fol:r[4]});
+    const o=byInfMap[k]; o.cnt++; o.cost+=r[5]; o.views+=(r[7]||0); if(r[9]!=null){o.erSum+=r[9];o.erN++;} });
+  const byInf = Object.values(byInfMap).map(o=>({...o, er:o.erN?o.erSum/o.erN:null})).sort((a,b)=>b.cost-a.cost);
+  // 제품별
+  const byProdMap = {};
+  R.forEach(r=>{ const k=r[6]||'미지정'; (byProdMap[k]=byProdMap[k]||{n:k,cnt:0,cost:0,views:0});
+    byProdMap[k].cnt++; byProdMap[k].cost+=r[5]; byProdMap[k].views+=(r[7]||0); });
+  const byProd = Object.values(byProdMap).sort((a,b)=>b.cost-a.cost);
+  // 콘텐츠 유형별
+  const byTypeMap = {};
+  R.forEach(r=>{ const k=r[3]||'미지정'; (byTypeMap[k]=byTypeMap[k]||{n:k,cnt:0,cost:0,erSum:0,erN:0});
+    const o=byTypeMap[k]; o.cnt++; o.cost+=r[5]; if(r[9]!=null){o.erSum+=r[9];o.erN++;} });
+  const byType = Object.values(byTypeMap).map(o=>({...o,er:o.erN?o.erSum/o.erN:null})).sort((a,b)=>b.cost-a.cost);
+  return { total:R.length, doneN:done.length, pendingN:pending.length,
+           totCost, doneCost, pendingCost:totCost-doneCost, totViews, totLikes, avgER,
+           byMonth, byInf, byProd, byType };
+}
+
+/* ==========================================================
    파생 — 아마존 일자별×제품별(실측) 에서 모든 집계를 산출
    더 이상 추정 없음. 시트의 [매출액]/[주문수량]/[PV] 탭이 단일 진실.
    ========================================================== */
