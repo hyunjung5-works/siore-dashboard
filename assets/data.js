@@ -133,19 +133,17 @@ const FX_API = 'https://open.er-api.com/v6/latest/USD';
    ========================================================== */
 (function deriveB2B(){
   const R = SNAP.b2bRaw, A = SNAP.b2bAccountNames;
-  const ord = R.filter(r=>r[2]==='O'), smp = R.filter(r=>r[2]==='S');
+  // 샘플구분도 매출로 집계 (주문 O + 샘플 S 모두 포함)
+  const ord = R;
 
   SNAP.b2bLastDay = R.map(r=>r[0]).sort().pop();
 
   SNAP.b2bRange = (from, to) => {
-    const f = r => (!from || r[0]>=from) && (!to || r[0]<=to);
-    const o = ord.filter(f), s = smp.filter(f);
+    const o = ord.filter(r => (!from || r[0]>=from) && (!to || r[0]<=to));
     return {
       rev:    o.reduce((a,r)=>a+r[5],0),
       qty:    o.reduce((a,r)=>a+r[4],0),
       lines:  o.length,
-      sample: s.reduce((a,r)=>a+r[5],0),
-      sampleQty: s.reduce((a,r)=>a+r[4],0),
       accounts: new Set(o.map(r=>r[1])).size,
     };
   };
@@ -164,6 +162,17 @@ const FX_API = 'https://open.er-api.com/v6/latest/USD';
        .forEach(r=>{ acc[r[1]] = acc[r[1]] || { n:A[r[1]], rev:0, qty:0 };
                      acc[r[1]].rev += r[5]; acc[r[1]].qty += r[4]; });
     return Object.values(acc).sort((a,b)=>b.rev-a.rev);
+  };
+
+  // 일자별 [날짜, 건수, 수량, 매출] — 주간/일별 그래프용
+  SNAP.b2bDates = [...new Set(ord.map(r=>r[0]))].sort();
+  SNAP.b2bDaily = SNAP.b2bDates.map(d=>{
+    const rows = ord.filter(r=>r[0]===d);
+    return [d, rows.length, rows.reduce((a,r)=>a+r[4],0), rows.reduce((a,r)=>a+r[5],0)];
+  });
+  SNAP.b2bDay = date => {
+    const rows = ord.filter(r=>r[0]===date);
+    return { date, lines:rows.length, qty:rows.reduce((a,r)=>a+r[4],0), rev:rows.reduce((a,r)=>a+r[5],0) };
   };
 
   // 월별 (기존 호환)
