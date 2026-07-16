@@ -517,20 +517,17 @@ function renderFlow(){
       <td>${U.num(U.sum(Object.values(shipTotal)))}</td><td></td></tr></tbody>`;
 }
 
-/* ---------- 발주 현황 ---------- */
+/* ---------- 발주 현황 (5.발주관리 요약 · 발주중/발주필요/순) ---------- */
 function renderPO(){
-  const today = new Date(SNAP.stockAsOf.ourbox);
   document.getElementById('tb-po-inv').innerHTML =
-    `<thead><tr><th>제품명</th><th>수량</th><th>발주일</th><th>입고예정일</th><th>D-Day</th><th>상태</th></tr></thead><tbody>
-    ${SNAP.purchaseOrders.map(([n,q,od,eta])=>{
-      const d = Math.round((new Date(eta)-today)/86400000);
-      const late = d < 0;
-      return `<tr><td>${n}</td><td>${U.num(q)}</td><td>${od}</td><td>${eta}</td>
-        <td><b style="color:${late?'var(--bad)':(d<=14?'var(--warn)':'var(--tx-2)')}">${late?`+${-d}일 지연`:`D-${d}`}</b></td>
-        <td style="text-align:left">${late?'<span class="bdg bdg-bad">입고 지연</span>'
-          :(d<=14?'<span class="bdg bdg-warn">임박</span>':'<span class="bdg bdg-info">발주중</span>')}</td></tr>`;
-    }).join('')}
-    <tr class="total"><td>합계 (발주중)</td><td>${U.num(U.sum(SNAP.purchaseOrders,p=>p[1]))}</td><td colspan="4"></td></tr>
+    `<thead><tr><th>제품명</th><th>발주중 (미입고)</th><th>발주필요 (H2예측)</th><th>순발주필요</th><th>상태</th></tr></thead><tbody>
+    ${SNAP.purchaseOrders.map(([n,onOrd,need,net])=>`<tr><td>${n}</td>
+      <td><b style="color:var(--tx)">${U.num(onOrd)}</b></td>
+      <td>${need?U.num(need):'—'}</td>
+      <td>${net>0?`<b style="color:var(--bad)">${U.num(net)}</b>`:'0'}</td>
+      <td style="text-align:left">${net>0?'<span class="bdg bdg-warn">추가 발주 필요</span>':(need?'<span class="bdg bdg-good">발주중 충족</span>':'<span class="bdg bdg-info">발주중</span>')}</td></tr>`).join('')}
+    <tr class="total"><td>합계</td><td>${U.num(U.sum(SNAP.purchaseOrders,p=>p[1]))}</td>
+      <td>${U.num(U.sum(SNAP.purchaseOrders,p=>p[2]))}</td><td>${U.num(U.sum(SNAP.purchaseOrders,p=>p[3]))}</td><td></td></tr>
     </tbody>`;
 }
 
