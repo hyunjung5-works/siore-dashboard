@@ -66,7 +66,7 @@
       <div class="chart"><canvas id="c-wk"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-h"><h3>월별 요약</h3><span class="hint">6월 · 7월(진행중)</span></div>
+      <div class="card-h"><h3>월별 광고비 (메타+아마존)</h3><span class="hint">구매·ROAS는 메타 기준</span></div>
       <div class="tbl-wrap"><table id="tb-mon"></table></div>
       <div class="alert" id="mon-insight" style="margin:14px 0 0"><span class="ico">💡</span><div>—</div></div>
     </div>
@@ -255,23 +255,25 @@ function renderOv(){
            ticks:{color:'#0FB89A',font:{size:10.5},callback:v=>v+'%'}} } })
   });
 
-  // 월별
+  // 월별 (메타 + 아마존 광고비 합계)
   const M = monAgg();
+  const amzMon = k => (typeof ADS!=='undefined' && ADS.monthly[k]) ? ADS.monthly[k].amazon : 0;
+  const totAmz = M.reduce((a,m)=>a+amzMon(m.k),0);
   document.getElementById('tb-mon').innerHTML =
-    `<thead><tr><th>월</th><th>일수</th><th>광고비</th><th>구매</th><th>전환값</th><th>ROAS</th><th>CPA</th></tr></thead><tbody>
-    ${M.map(m=>`<tr><td>${m.k}</td><td>${m.days}</td><td>${U.usd(m.spend)}</td><td>${m.buy}</td>
-      <td>${U.usd(m.rev)}</td><td><b style="color:${m.rev/m.spend>=2?'var(--good)':'var(--warn)'}">${(m.rev/m.spend*100).toFixed(0)}%</b></td>
-      <td>${U.usd2(m.spend/m.buy)}</td></tr>`).join('')}
-    <tr class="total"><td>합계</td><td>${A.length}</td><td>${U.usd(T.spend)}</td><td>${T.buy}</td>
-      <td>${U.usd(T.rev)}</td><td>${T.roas.toFixed(0)}%</td><td>${U.usd2(T.cpa)}</td></tr></tbody>`;
+    `<thead><tr><th>월</th><th>메타 광고비</th><th>아마존 광고비</th><th>총 광고비</th><th>메타 구매</th><th>메타 ROAS</th></tr></thead><tbody>
+    ${M.map(m=>{ const az=amzMon(m.k);
+      return `<tr><td>${m.k}</td><td>${U.usd(m.spend)}</td><td>${U.usd(az)}</td>
+        <td><b style="color:var(--tx)">${U.usd(m.spend+az)}</b></td><td>${m.buy}</td>
+        <td><b style="color:${m.rev/m.spend>=1.67?'var(--good)':'var(--bad)'}">${(m.rev/m.spend*100).toFixed(0)}%</b></td></tr>`; }).join('')}
+    <tr class="total"><td>합계</td><td>${U.usd(T.spend)}</td><td>${U.usd(totAmz)}</td>
+      <td>${U.usd(T.spend+totAmz)}</td><td>${T.buy}</td><td>${T.roas.toFixed(0)}%</td></tr></tbody>`;
 
   const jun = M.find(m=>m.k==='2026-06'), jul = M.find(m=>m.k==='2026-07');
-  const jRoas = jun.rev/jun.spend*100, lRoas = jul.rev/jul.spend*100;
+  const jRoas = jun?jun.rev/jun.spend*100:0, lRoas = jul?jul.rev/jul.spend*100:0;
   document.getElementById('mon-insight').querySelector('div').innerHTML =
-    `6월 ROAS <b class="up">${jRoas.toFixed(0)}%</b> → 7월 <b class="${lRoas<jRoas?'dn':'up'}">${lRoas.toFixed(0)}%</b>.
-     6월은 <b>6/23~26 대형 프로모션</b>(4일간 광고비 ${U.usd(U.sum(A.filter(r=>['2026-06-23','2026-06-24','2026-06-25','2026-06-26'].includes(r[0])),r=>r[1]))} · 구매 513건)이 전체를 끌어올린 구조입니다.
-     7월은 지출을 다시 올리고 있으나(7/10~11 급증) ROAS가 <b class="dn">100% 부근</b>까지 내려왔습니다 —
-     <b>같은 소재·같은 타겟으로 예산만 올리는 구간</b>이라는 신호입니다.`;
+    `<b>메타 광고 ROAS는 6월 ${jRoas.toFixed(0)}% · 7월 ${lRoas.toFixed(0)}%</b>로 전환 효율이 매우 낮습니다(전 기간 전환 ${T.buy}건 · 전환매출 ${U.usd(T.rev)}).
+     반면 <b>아마존 광고는 ROAS 168%</b>로 견조합니다 — 예산은 아마존·인플루언서에 우선 배분하고,
+     <b>메타는 소재·타겟·랜딩(아마존 상세페이지 연결)을 전면 재점검</b>한 뒤 소액 테스트로 회복 여부를 확인하세요.`;
 }
 
 function drawMain(n){

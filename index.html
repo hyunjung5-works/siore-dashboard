@@ -448,7 +448,8 @@ function renderAll(){
 
 /* ==================== 02 마케팅 성과 ==================== */
 function renderMarketing(CH, FX, wkFrom){
-  const A = S.adsChannels;
+  // 광고 채널: 데이터레이어 ADS(시트 [2026 광고데이터]) 권위 기준 · [매체,노출,클릭,비용,PV,장바구니,구매,전환]
+  const A = ADS.channels.map(c=>[c[0], c[1], c[2], c[3], c[0]==='Meta'?37970:0, c[0]==='Meta'?431:0, c[4], c[5]]);
   const amzSP = A.find(x=>x[0]==='Amazon SP'), meta = A.find(x=>x[0]==='Meta');
   const spend = U.sum(A, x=>x[3]);
   const adRev = U.sum(A, x=>x[7]);
@@ -504,7 +505,7 @@ function renderMarketing(CH, FX, wkFrom){
     row('총 광고비', U.usd2(spend), `${U.krwM(spend*FX)}원`) +
     row('광고 전환매출', U.usd2(adRev), `${U.krwM(adRev*FX)}원`) +
     row('통합 ROAS', `${(adRev/spend*100).toFixed(1)}%`, `BEP 167%`) +
-    row('예산 소진율', `${(spend*FX/S.adsBudgetKRW*100).toFixed(1)}%`, `예산 ${U.krwM(S.adsBudgetKRW)}원`);
+    row('연 예산 집행', `${(spend*FX/AMZ_PLAN.totalAdKRW*100).toFixed(1)}%`, `연 마케팅예산 ${U.krwM(AMZ_PLAN.totalAdKRW)}원`);
 
   /* 트래픽 · 전환 */
   const amzYtd = amzRange();
@@ -518,9 +519,8 @@ function renderMarketing(CH, FX, wkFrom){
     row('객단가 (AOV)', U.usd2(adRev/buy), `광고 기준`);
 
   /* 집행 기간 표기 */
-  const mFrom = (S.adsDaily[0]||[])[0], mTo = (S.adsDaily[S.adsDaily.length-1]||[])[0];
-  g('paid-per').textContent = `집행 누적 · 아마존 전체기간 · 메타 ${mFrom?mFrom.slice(5):'—'}~${mTo?mTo.slice(5):'—'}`;
-  g('traffic-per').textContent = `전체기간 누적 (아마존 리포트 ver.5)`;
+  g('paid-per').textContent = `집행 누적 · 아마존 + 메타 (${ADS.asOf})`;
+  g('traffic-per').textContent = `누적 · 아마존 + 메타 (${ADS.asOf})`;
   g('inf-per').textContent = INFLUENCER.asOf;
 
   /* 인플루언서 성과 요약 (상품별 ROAS 대체) */
@@ -656,13 +656,13 @@ function renderSignals(CH, totYtd, totWk, totPw, FX){
       d:`아마존 매출의 <b>67%</b>를 만드는 <b>NMN 인텐시브 세럼</b>의 FBA 재고가 <b>${U.num(serum.st)}개</b>, 30일 판매 ${U.num(serum.s30)}개 기준 <b>${Math.round(serum.runway)}일치</b>뿐입니다.
          30,000개 발주는 걸려 있으나 입고예정일이 <b>${po[3]}</b> — <b class="dn">약 ${gapDays}일의 품절 공백</b>이 발생합니다.`,
       a:`국내 아워박스 재고(${U.num(STOCK.find(s=>s.n==='NMN 인텐시브 세럼').st)}개 + 발송대기 ${U.num(STOCK.find(s=>s.n==='NMN 인텐시브 세럼').idle)}개)에서 <b>항공 특송으로 긴급 FBA 보충</b>하세요. 이번 주 결정 사항입니다.` },
-    { ico:'📣', tone: metaRoas>=250?'good':'warn',
-      t:`마케팅 효율 — Meta ROAS ${metaRoas.toFixed(0)}% · 인플루언서 ER ${inf.avgER.toFixed(1)}%`,
-      d:`검증된 채널이 뚜렷합니다. <b>Meta 광고 ROAS ${metaRoas.toFixed(0)}%</b>(ACOS ${metaAcos.toFixed(0)}%)로 효율 양호,
-         <b>인플루언서 22건 평균 ER ${inf.avgER.toFixed(1)}%</b>(업계 1~3% 상회)로 브랜드 확산이 살아있습니다.
-         상대적으로 <b>아마존 PPC는 ROAS ${spRoas.toFixed(0)}%</b>로 키워드·입찰 최적화 여지가 있습니다.`,
-      a:`효율이 검증된 <b>Meta·인플루언서에 하반기 증액 예산</b>(마케팅 ${U.krwM(AMZ_PLAN.totalAdKRW)}원)을 우선 배분하고,
-         아마존 PPC는 저효율 키워드 정리 후 ROAS 150%+ 회복 시 증액하세요.` },
+    { ico:'📣', tone:'warn',
+      t:`마케팅 효율 — 아마존 ROAS ${spRoas.toFixed(0)}% 강세 · 메타 ${metaRoas.toFixed(0)}% 저조`,
+      d:`채널 효율이 뚜렷이 갈립니다. <b>아마존 광고 ROAS ${spRoas.toFixed(0)}%</b>로 광고비 대비 매출이 잘 돌고,
+         <b>인플루언서 ${inf.total}건 평균 ER ${inf.avgER.toFixed(1)}%</b>(업계 1~3% 상회)로 브랜드 확산도 살아있습니다.
+         반면 <b>메타는 ROAS ${metaRoas.toFixed(0)}%</b>(광고비 ${U.usd(metaSpend)} → 전환 ${U.usd(metaRev)})로 광고비 대비 전환이 매우 약합니다.`,
+      a:`효율이 검증된 <b>아마존 광고·인플루언서 시딩</b>에 하반기 증액 예산(마케팅 ${U.krwM(AMZ_PLAN.totalAdKRW)}원)을 우선 배분하고,
+         <b>메타는 소재·타겟·랜딩(아마존 상세페이지 연결)을 재점검</b> 후 소액 테스트로 ROAS를 끌어올린 뒤 증액하세요.` },
     { ico: dWk.v>=0?'📈':'📉', tone: dWk.v>=0?'good':'bad',
       t:`주간 매출 ${U.krwM(totWk)}원 · 전주 대비 ${dWk.tx}`,
       d:`아마존 ${U.krwM(CH.amazon.wk)} · 자사몰 ${U.krwM(CH.own.wk)} · B2B ${U.krwM(CH.b2b.wk)}.
