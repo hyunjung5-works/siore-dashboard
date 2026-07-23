@@ -2,7 +2,7 @@
    SIORÉ 대시보드 · 데이터 스냅샷
    ⚠️ Google Apps Script 자동 생성 — 직접 수정하지 마세요.
    ========================================================== */
-const GENERATED_AT = '2026-07-22 15:01 KST';
+const GENERATED_AT = '2026-07-23 09:45 KST';
 
 const SNAP = {
  "amazonProductNames": [
@@ -8729,8 +8729,8 @@ const SNAP = {
   ]
  ],
  "stockAsOf": {
-  "ourbox": "2026-07-22",
-  "amazon": "2026-07-22"
+  "ourbox": "2026-07-23",
+  "amazon": "2026-07-23"
  },
  "purchaseOrders": [
   [
